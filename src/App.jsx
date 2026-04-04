@@ -13,6 +13,7 @@ import Faq from './pages/Faq/Faq';
 import Access from './pages/Access/Access';
 import Contact from './pages/Contact/Contact';
 import LocalGuide from './pages/LocalGuide/LocalGuide';
+import AdminPage from './pages/Admin/Admin';
 
 function ScrollToTop() {
   const { pathname, hash } = useLocation();
@@ -50,6 +51,7 @@ function App() {
           <Route path="/local-guide" element={<LocalGuide />} />
           <Route path="/access" element={<Access />} />
           <Route path="/contact" element={<Contact />} />
+          <Route path="/admin" element={<AdminPage />} />
         </Routes>
       </main>
       <Footer />

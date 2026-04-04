@@ -2,7 +2,7 @@ import React, { useState, useRef, useEffect } from 'react';
 import { MapContainer, TileLayer, Marker, Popup, LayersControl, useMapEvents } from 'react-leaflet';
 import L from 'leaflet';
 import { MapPin, Navigation } from 'lucide-react';
-import { fireflyPoints, parkingLots } from '../../data/mockData';
+import { supabase } from '../../lib/supabaseClient';
 import { formatStatusTime, getLatestUpdate, getFormattedToday } from '../../utils/dateUtils';
 import 'leaflet/dist/leaflet.css';
 import './Map.css';
@@ -92,11 +92,29 @@ function LocationPicker() {
 
 export default function MapPage() {
   const [map, setMap] = useState(null);
+  const [fireflyPoints, setFireflyPoints] = useState([]);
+  const [parkingLots, setParkingLots] = useState([]);
   const [userPosition, setUserPosition] = useState(null);
   const [isLocating, setIsLocating] = useState(false);
   const [shouldFollowUser, setShouldFollowUser] = useState(false);
+  const [isLoading, setIsLoading] = useState(true);
   const markerRefs = useRef({});
   const center = [37.7578, 138.8328];
+
+  // Supabaseからデータを取得
+  useEffect(() => {
+    async function fetchData() {
+      setIsLoading(true);
+      const [fpRes, plRes] = await Promise.all([
+        supabase.from('firefly_points').select('*'),
+        supabase.from('parking_lots').select('*'),
+      ]);
+      if (fpRes.data) setFireflyPoints(fpRes.data);
+      if (plRes.data) setParkingLots(plRes.data);
+      setIsLoading(false);
+    }
+    fetchData();
+  }, []);
 
   useEffect(() => {
     if (!map) return;
@@ -161,7 +179,7 @@ export default function MapPage() {
   };
   
   // 飛翔ポイントの中から最新の更新日時を取得
-  const latestUpdate = getLatestUpdate(fireflyPoints);
+  const latestUpdate = getLatestUpdate(fireflyPoints.map(p => ({ ...p, lastUpdated: p.updated_at })));
   const todayLabel = getFormattedToday();
 
   return (
@@ -225,7 +243,7 @@ export default function MapPage() {
                     <strong>{point.name}</strong><br />
                     <span>{statusLabels[point.status]?.label}</span><br />
                     <small>{point.description}</small><br />
-                    <small style={{ color: '#888' }}>更新: {formatStatusTime(point.lastUpdated)}</small>
+                    <small style={{ color: '#888' }}>更新: {formatStatusTime(point.updated_at)}</small>
                   </div>
                 </Popup>
               </Marker>
@@ -241,7 +259,7 @@ export default function MapPage() {
                   <div style={{ color: '#333', minWidth: '160px' }}>
                     <strong>🅿️ {lot.id} {lot.name}</strong><br />
                     <span>{parkingLabels[lot.status]?.label}</span><br />
-                    <small>収容台数: {lot.capacity}台 ・ {lot.walkTime}</small>
+                    <small>収容台数: {lot.capacity}台 ・ {lot.walk_time}</small>
                   </div>
                 </Popup>
               </Marker>
@@ -315,7 +333,7 @@ export default function MapPage() {
               <span className={`badge ${statusLabels[point.status]?.badge}`}>
                 {statusLabels[point.status]?.label}
               </span>
-              <span className="point-updated">{formatStatusTime(point.lastUpdated)}</span>
+              <span className="point-updated">{formatStatusTime(point.updated_at)}</span>
             </div>
           </div>
         ))}
@@ -329,7 +347,7 @@ export default function MapPage() {
                 <span style={{ color: 'var(--color-firefly)', fontWeight: '700', marginRight: '6px' }}>{lot.id}</span>
                 {lot.name}
               </div>
-              <div className="parking-capacity">{lot.capacity}台 ・ {lot.walkTime}</div>
+              <div className="parking-capacity">{lot.capacity}台 ・ {lot.walk_time}</div>
               {lot.hint && <div className="parking-hint">💡 {lot.hint}</div>}
             </div>
             <button 
