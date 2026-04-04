@@ -73,8 +73,8 @@ CREATE POLICY "管理用書き込み" ON admin_settings FOR ALL USING (true) WIT
 -- 初期データの投入
 -- ============================================
 
--- 管理画面パスワード（後で変更してください）
-INSERT INTO admin_settings (key, value) VALUES ('admin_password', 'hotaru2026');
+-- 管理画面パスワード（Supabase SQL Editor で直接設定してください）
+-- UPDATE admin_settings SET value = '（パスワード）' WHERE key = 'admin_password';
 
 -- 飛翔ポイント初期データ
 INSERT INTO firefly_points (id, name, course, lat, lng, status, description, updated_at) VALUES
