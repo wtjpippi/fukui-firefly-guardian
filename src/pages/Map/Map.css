@@ -1,0 +1,367 @@
+.map-page {
+  padding-bottom: var(--space-2xl);
+}
+
+.map-container {
+  position: relative;
+  z-index: var(--z-base);
+  height: 50vh;
+  min-height: 300px;
+  border-radius: var(--radius-lg);
+  overflow: hidden;
+  border: 1px solid var(--color-border);
+  margin-bottom: var(--space-lg);
+}
+
+.map-container .leaflet-container {
+  height: 100%;
+  width: 100%;
+  background: var(--color-bg-primary);
+}
+
+.locate-button {
+  position: absolute;
+  top: 10px; /* 右上の標準的な位置に戻す */
+  right: 10px;
+  z-index: 1000;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  background: rgba(15, 38, 20, 0.8);
+  backdrop-filter: blur(8px);
+  border: 1px solid var(--color-firefly);
+  color: var(--color-firefly);
+  padding: 8px 16px;
+  border-radius: var(--radius-md);
+  font-size: 13px;
+  font-weight: 700;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.5);
+}
+
+.locate-button:hover {
+  background: var(--color-firefly);
+  color: var(--color-bg-primary);
+  transform: translateY(-2px);
+}
+
+.locate-button.loading {
+  opacity: 0.7;
+  cursor: wait;
+}
+
+.locate-button.active {
+  background: var(--color-firefly);
+  color: var(--color-bg-primary);
+  border-color: var(--color-firefly);
+}
+
+.locate-button.active .active-icon {
+  filter: drop-shadow(0 0 5px rgba(0, 0, 0, 0.3));
+}
+
+/* User Location Marker */
+.user-location-marker {
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.user-dot {
+  width: 12px;
+  height: 12px;
+  background: #3b82f6;
+  border: 2px solid white;
+  border-radius: 50%;
+  box-shadow: 0 0 10px rgba(59, 130, 246, 0.8);
+  z-index: 2;
+}
+
+.user-pulse {
+  position: absolute;
+  width: 30px;
+  height: 30px;
+  background: rgba(59, 130, 246, 0.4);
+  border-radius: 50%;
+  animation: user-pulse 2s infinite;
+  z-index: 1;
+}
+
+@keyframes user-pulse {
+  0% { transform: scale(0.5); opacity: 1; }
+  100% { transform: scale(2.5); opacity: 0; }
+}
+
+/* Custom Leaflet Controls */
+.leaflet-control-layers {
+  background: rgba(15, 38, 20, 0.8) !important;
+  backdrop-filter: blur(8px);
+  border: 1px solid rgba(200, 230, 78, 0.3) !important;
+  color: #fff !important;
+  border-radius: var(--radius-md) !important;
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.5) !important;
+}
+
+.leaflet-control-layers-expanded {
+  padding: 12px !important;
+}
+
+.leaflet-control-layers label {
+  font-size: 12px;
+  margin-bottom: 4px;
+  cursor: pointer;
+}
+
+.leaflet-control-layers-base label {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+/* Legend */
+.map-legend {
+  margin-bottom: var(--space-lg);
+}
+
+.map-legend-title {
+  font-family: var(--font-display);
+  font-size: var(--text-base);
+  font-weight: 700;
+  margin-bottom: var(--space-sm);
+}
+
+.map-legend-items {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-md);
+}
+
+.map-legend-item {
+  display: flex;
+  align-items: center;
+  gap: var(--space-xs);
+  font-size: var(--text-xs);
+  color: var(--color-text-primary);
+}
+
+.map-legend-content {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-md);
+}
+
+.map-legend-group {
+  background: rgba(255, 255, 255, 0.05);
+  padding: var(--space-sm) var(--space-md);
+  border-radius: var(--radius-md);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.map-legend-sub {
+  font-size: var(--text-xs);
+  color: var(--color-firefly);
+  font-weight: 700;
+  margin-bottom: var(--space-xs);
+  letter-spacing: 0.05em;
+}
+
+@media (min-width: 768px) {
+  .map-legend-content {
+    flex-direction: row;
+    gap: var(--space-lg);
+  }
+  
+  .map-legend-group {
+    flex: 1;
+  }
+}
+
+.legend-dot {
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+}
+
+.legend-dot.high { background: var(--color-status-high); box-shadow: 0 0 6px var(--color-status-high); }
+.legend-dot.medium { background: var(--color-status-medium); box-shadow: 0 0 6px var(--color-status-medium); }
+.legend-dot.low { background: var(--color-status-low); }
+.legend-dot.available { background: var(--color-status-high); }
+.legend-dot.limited { background: var(--color-status-medium); }
+.legend-dot.full { background: var(--color-status-full); }
+
+/* Points list */
+.map-section-title {
+  font-family: var(--font-display);
+  font-size: var(--text-lg);
+  font-weight: 700;
+  margin: var(--space-xl) 0 var(--space-md);
+  display: flex;
+  align-items: center;
+  gap: var(--space-sm);
+}
+
+.map-section-note {
+  font-size: var(--text-xs);
+  color: var(--color-text-secondary);
+  margin: -10px 0 var(--space-md) 0;
+  padding-left: 4px;
+}
+
+.point-card {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: var(--space-sm);
+}
+
+.point-info {
+  flex: 1;
+}
+
+.point-name {
+  font-weight: 500;
+  font-size: var(--text-sm);
+  margin-bottom: 2px;
+}
+
+.point-course {
+  font-size: var(--text-xs);
+  color: var(--color-text-secondary);
+}
+
+.badge-normal {
+  background: rgba(148, 163, 184, 0.2);
+  color: #94a3b8;
+  border-color: rgba(148, 163, 184, 0.4);
+}
+
+.live-dot {
+  width: 6px;
+  height: 6px;
+  background: currentColor;
+  border-radius: 50%;
+  box-shadow: 0 0 8px currentColor;
+  animation: pulse-dot 2s infinite;
+}
+
+@keyframes pulse-dot {
+  0% { opacity: 1; transform: scale(1); }
+  50% { opacity: 0.4; transform: scale(1.2); }
+  100% { opacity: 1; transform: scale(1); }
+}
+
+.jump-button {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid rgba(200, 230, 78, 0.2);
+  color: var(--color-firefly);
+  padding: 6px 12px;
+  border-radius: var(--radius-full);
+  font-size: 11px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  backdrop-filter: blur(4px);
+  margin: 0 var(--space-md);
+  white-space: nowrap;
+}
+
+.jump-button:hover {
+  background: rgba(200, 230, 78, 0.1);
+  border-color: var(--color-firefly);
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(200, 230, 78, 0.2);
+}
+
+.jump-button svg {
+  transition: transform 0.3s ease;
+}
+
+.jump-button:hover svg {
+  transform: scale(1.2);
+}
+
+.point-status {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 2px;
+}
+
+.point-updated {
+  font-size: var(--text-xs);
+  color: var(--color-text-muted);
+}
+
+/* Parking */
+.parking-card {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: var(--space-sm);
+}
+
+.parking-card .badge {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 4px 10px;
+  border-radius: 20px;
+  font-size: 11px;
+  font-weight: 600;
+  border-width: 1px;
+  border-style: solid;
+}
+
+.parking-info {
+  flex: 1;
+}
+
+.parking-name {
+  font-weight: 500;
+  font-size: var(--text-sm);
+  margin-bottom: 2px;
+}
+
+.parking-capacity {
+  font-size: var(--text-xs);
+  color: var(--color-text-muted);
+  margin-bottom: 4px;
+}
+
+.parking-hint {
+  font-size: var(--text-xs);
+  color: var(--color-firefly);
+  background: rgba(200, 230, 78, 0.1);
+  padding: 4px 10px;
+  border-radius: 4px;
+  margin-top: 6px;
+  line-height: 1.4;
+  border-left: 2px solid var(--color-firefly);
+  width: fit-content; /* 背景をテキストの長さに合わせる */
+}
+
+@media (max-width: 480px) {
+  .parking-hint {
+    max-width: 100%;
+  }
+}
+
+.parking-jump {
+  margin: 0 var(--space-sm);
+}
+
+.last-updated-banner {
+  text-align: center;
+  padding: var(--space-sm) var(--space-md);
+  background: var(--color-firefly-bg);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
+  font-size: var(--text-xs);
+  color: var(--color-text-secondary);
+  margin-bottom: var(--space-lg);
+}
