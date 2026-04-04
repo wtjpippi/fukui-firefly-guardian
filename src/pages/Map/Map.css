@@ -224,6 +224,32 @@
   font-weight: 500;
   font-size: var(--text-sm);
   margin-bottom: 2px;
+  line-height: 1.4;
+}
+
+.point-name-course {
+  display: inline;
+}
+
+.point-name-spot {
+  display: inline;
+  color: var(--color-firefly); /* 少し色を変えて区別しやすくする */
+}
+
+@media (max-width: 480px) {
+  .point-name-course {
+    display: block;
+    font-size: var(--text-xs);
+    color: var(--color-text-secondary);
+  }
+  .point-name-spot {
+    display: block;
+    font-size: var(--text-sm);
+    font-weight: 700;
+  }
+  .point-name-sep {
+    display: none;
+  }
 }
 
 .point-course {
@@ -303,6 +329,30 @@
   align-items: center;
   justify-content: space-between;
   margin-bottom: var(--space-sm);
+  gap: var(--space-sm);
+}
+
+@media (max-width: 480px) {
+  .parking-card {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: var(--space-xs);
+  }
+}
+
+.parking-actions {
+  display: flex;
+  align-items: center;
+  gap: var(--space-sm);
+}
+
+@media (max-width: 480px) {
+  .parking-actions {
+    width: 100%;
+    justify-content: flex-start;
+    gap: var(--space-md);
+    margin-top: 4px;
+  }
 }
 
 .parking-card .badge {
@@ -315,6 +365,7 @@
   font-weight: 600;
   border-width: 1px;
   border-style: solid;
+  white-space: nowrap;
 }
 
 .parking-info {
@@ -325,7 +376,12 @@
   font-weight: 500;
   font-size: var(--text-sm);
   margin-bottom: 2px;
+  white-space: nowrap; /* 改行を禁止 */
+  overflow: hidden;
+  text-overflow: ellipsis; /* 万一長すぎてもはみ出さない */
 }
+
+
 
 .parking-capacity {
   font-size: var(--text-xs);

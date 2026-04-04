@@ -70,20 +70,34 @@ function createParkingIcon(status, label) {
   });
 }
 
-// function formatTime(dateStr) は dateUtils の formatStatusTime に置き換えるため削除
+function createVenueIcon() {
+  return L.divIcon({
+    className: 'custom-marker venue-marker',
+    html: `<div style="
+      width: 30px; height: 30px;
+      background: rgba(255, 251, 235, 0.5);
+      backdrop-filter: blur(2px);
+      border-radius: 50%;
+      box-shadow: 0 0 10px rgba(239, 68, 68, 0.3);
+      display: flex; align-items: center; justify-content: center;
+      font-size: 16px;
+    ">🏮</div>`,
+    iconSize: [30, 30],
+    iconAnchor: [15, 15],
+  });
+}
 
 function LocationPicker() {
   useMapEvents({
     click(e) {
       const { lat, lng } = e.latlng;
       const coords = `[${lat.toFixed(6)}, ${lng.toFixed(6)}]`;
-      
-      // クリップボードにコピー
+
       navigator.clipboard.writeText(coords).then(() => {
         alert(`座標をコピーしました！\n${coords}\n\nそのままチャットに貼り付けて教えてください。`);
       }).catch(err => {
         console.error('Copy failed: ', err);
-        alert(`座標: ${coords}\n\n(自動コピーに失敗しました。手動でメモするか、デベロッパーツールのコンソールを確認してください)`);
+        alert(`座標: ${coords}\n\n(自動コピーに失敗しました)`);
       });
     },
   });
@@ -99,9 +113,8 @@ export default function MapPage() {
   const [shouldFollowUser, setShouldFollowUser] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
   const markerRefs = useRef({});
-  const center = [37.7578, 138.8328];
+  const center = [37.758621, 138.831192];
 
-  // Supabaseからデータを取得
   useEffect(() => {
     async function fetchData() {
       setIsLoading(true);
@@ -122,7 +135,6 @@ export default function MapPage() {
     const onLocationFound = (e) => {
       setUserPosition(e.latlng);
       setIsLocating(false);
-      // 初回取得時、または「追従モード」がオンの場合のみ中心に移動
       if (shouldFollowUser) {
         map.flyTo(e.latlng, 16);
       }
@@ -131,11 +143,10 @@ export default function MapPage() {
     const onLocationError = (e) => {
       setIsLocating(false);
       setShouldFollowUser(false);
-      alert('現在地の取得に失敗しました。ブラウザの位置情報設定を確認してください。');
+      alert('現在地の取得に失敗しました。');
     };
 
     const onDragStart = () => {
-      // ユーザーが手動で地図を動かしたら自動追従を解除
       setShouldFollowUser(false);
     };
 
@@ -154,7 +165,6 @@ export default function MapPage() {
     if (map) {
       setIsLocating(true);
       setShouldFollowUser(true);
-      // watch: true で継続的に位置を取得
       map.locate({ setView: false, watch: true, enableHighAccuracy: true });
     }
   };
@@ -165,20 +175,17 @@ export default function MapPage() {
         duration: 2,
         easeLinearity: 0.25
       });
-      // 該当マーカーのポップアップを開く
       const marker = markerRefs.current[locationId];
       if (marker) {
         marker.openPopup();
       }
-      // マップコンテナの要素までスムーズにスクロール
       const mapElement = document.querySelector('.map-container');
       if (mapElement) {
         mapElement.scrollIntoView({ behavior: 'smooth', block: 'center' });
       }
     }
   };
-  
-  // 飛翔ポイントの中から最新の更新日時を取得
+
   const latestUpdate = getLatestUpdate(fireflyPoints.map(p => ({ ...p, lastUpdated: p.updated_at })));
   const todayLabel = getFormattedToday();
 
@@ -194,23 +201,23 @@ export default function MapPage() {
         </div>
 
         <div className="map-container">
-          <button 
+          <button
             className={`locate-button ${isLocating ? 'loading' : ''} ${shouldFollowUser ? 'active' : ''}`}
             onClick={handleLocateUser}
             title={shouldFollowUser ? "追従中" : "現在地を表示"}
           >
-            <Navigation 
-              size={20} 
-              fill={shouldFollowUser ? "var(--color-firefly)" : "none"} 
+            <Navigation
+              size={20}
+              fill={shouldFollowUser ? "var(--color-firefly)" : "none"}
               className={shouldFollowUser ? 'active-icon' : ''}
             />
             <span>
-              {isLocating ? '取得中...' : 
-               shouldFollowUser ? '追従中' : 
-               userPosition ? '現在地へ' : '現在地'}
+              {isLocating ? '取得中...' :
+                shouldFollowUser ? '追従中' :
+                  userPosition ? '現在地へ' : '現在地'}
             </span>
           </button>
-          <MapContainer center={center} zoom={14.5} scrollWheelZoom={true} ref={setMap}>
+          <MapContainer center={center} zoom={15.5} scrollWheelZoom={true} ref={setMap}>
             <LayersControl position="bottomleft">
               <BaseLayer checked name="ダーク (標準)">
                 <TileLayer
@@ -226,6 +233,17 @@ export default function MapPage() {
               </BaseLayer>
             </LayersControl>
             {import.meta.env.DEV && <LocationPicker />}
+
+            <Marker position={[37.758621, 138.831192]} icon={createVenueIcon()}>
+              <Popup>
+                <div style={{ color: '#333', textAlign: 'center' }}>
+                  <div style={{ fontSize: '10px', color: '#f97316', fontWeight: 'bold' }}>MAIN VENUE</div>
+                  <strong style={{ fontSize: '14px' }}>福井ほたる祭り 会場</strong><br />
+                  <span style={{ fontSize: '12px' }}>（お祭り当日の本部・広場）</span>
+                </div>
+              </Popup>
+            </Marker>
+
             {userPosition && (
               <Marker position={userPosition} icon={createUserIcon()}>
                 <Popup>現在地</Popup>
@@ -239,11 +257,23 @@ export default function MapPage() {
                 icon={createFireflyIcon(point.status)}
               >
                 <Popup>
-                  <div style={{ color: '#333', minWidth: '150px' }}>
-                    <strong>{point.name}</strong><br />
-                    <span>{statusLabels[point.status]?.label}</span><br />
-                    <small>{point.description}</small><br />
-                    <small style={{ color: '#888' }}>更新: {formatStatusTime(point.updated_at)}</small>
+                  <div style={{ color: '#333', minWidth: '180px', padding: '4px' }}>
+                    <div style={{ fontWeight: '700', fontSize: '14px', marginBottom: '8px', borderBottom: '1px solid #eee', paddingBottom: '4px' }}>
+                      {point.name}
+                    </div>
+                    <div style={{ marginBottom: '8px' }}>
+                      <span className={`badge ${statusLabels[point.status]?.badge}`} style={{ padding: '2px 10px', fontSize: '11px' }}>
+                        {statusLabels[point.status]?.label}
+                      </span>
+                    </div>
+                    {point.description && (
+                      <div style={{ fontSize: '12px', color: '#555', lineHeight: '1.5', marginBottom: '8px', background: '#f9f9f9', padding: '6px', borderRadius: '4px' }}>
+                        {point.description}
+                      </div>
+                    )}
+                    <div style={{ fontSize: '10px', color: '#999', textAlign: 'right' }}>
+                      更新: {formatStatusTime(point.updated_at)}
+                    </div>
                   </div>
                 </Popup>
               </Marker>
@@ -267,15 +297,14 @@ export default function MapPage() {
           </MapContainer>
         </div>
 
-        {/* Legend */}
         <div className="map-legend">
           <div className="map-legend-header">
             <div className="map-legend-title">💡 マップの見方</div>
           </div>
-          
+
           <div className="map-legend-content">
             <div className="map-legend-group">
-              <div className="map-legend-sub">ほたるの飛翔状況</div>
+              <div className="map-legend-sub">ほたるの飛翔状況 / 会場</div>
               <div className="map-legend-items">
                 <div className="map-legend-item">
                   <span className="legend-dot high" /> 乱舞中
@@ -285,6 +314,9 @@ export default function MapPage() {
                 </div>
                 <div className="map-legend-item">
                   <span className="legend-dot low" /> まだ見えない
+                </div>
+                <div className="map-legend-item" style={{ marginLeft: '8px' }}>
+                  <span style={{ fontSize: '14px' }}>🏮</span> 祭り会場
                 </div>
               </div>
             </div>
@@ -314,14 +346,23 @@ export default function MapPage() {
           </div>
         </div>
 
-        {/* Firefly Points List */}
         <h2 className="map-section-title">✨ 飛翔ポイント</h2>
         {fireflyPoints.map(point => (
           <div key={point.id} className="glass-card point-card">
             <div className="point-info">
-              <div className="point-name">{point.name}</div>
+              <div className="point-name">
+                {point.name.includes('　') ? (
+                  <>
+                    <span className="point-name-course">{point.name.split('　')[0]}</span>
+                    <span className="point-name-sep"> </span>
+                    <span className="point-name-spot">{point.name.split('　')[1]}</span>
+                  </>
+                ) : (
+                  point.name
+                )}
+              </div>
             </div>
-            <button 
+            <button
               className="jump-button"
               onClick={() => handleJumpToLocation(point.id, point.lat, point.lng)}
               title="地図で見る"
@@ -350,18 +391,20 @@ export default function MapPage() {
               <div className="parking-capacity">{lot.capacity}台 ・ {lot.walk_time}</div>
               {lot.hint && <div className="parking-hint">💡 {lot.hint}</div>}
             </div>
-            <button 
-              className="jump-button parking-jump"
-              onClick={() => handleJumpToLocation(lot.id, lot.lat, lot.lng)}
-              title="地図で見る"
-            >
-              <MapPin size={14} />
-              <span>地図で見る</span>
-            </button>
-            <span className={`badge ${parkingLabels[lot.status]?.badge}`}>
-              {lot.status !== 'normal' && <span className="live-dot" />}
-              {parkingLabels[lot.status]?.label}
-            </span>
+            <div className="parking-actions">
+              <button
+                className="jump-button parking-jump"
+                onClick={() => handleJumpToLocation(lot.id, lot.lat, lot.lng)}
+                title="地図で見る"
+              >
+                <MapPin size={14} />
+                <span>地図で見る</span>
+              </button>
+              <span className={`badge ${parkingLabels[lot.status]?.badge}`}>
+                {lot.status !== 'normal' && <span className="live-dot" />}
+                {parkingLabels[lot.status]?.label}
+              </span>
+            </div>
           </div>
         ))}
       </div>

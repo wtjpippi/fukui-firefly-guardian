@@ -44,11 +44,15 @@ export default function AdminPage() {
   const [saving, setSaving] = useState(false);
   const [successMessage, setSuccessMessage] = useState('');
 
+  // 編集中のステータスと詳細テキスト用
+  const [pointStatuses, setPointStatuses] = useState({});
+  const [pointDescriptions, setPointDescriptions] = useState({});
+
   // 新規レポート用
   const [newReport, setNewReport] = useState({ title: '', content: '', category: '観測', date: new Date().toISOString().split('T')[0] });
   const [imageFile, setImageFile] = useState(null);
   const [imagePreview, setImagePreview] = useState(null);
-
+  
   // ライトボックス用
   const [lightboxOpen, setLightboxOpen] = useState(false);
   const [lightboxImage, setLightboxImage] = useState(null);
@@ -130,7 +134,18 @@ export default function AdminPage() {
       supabase.from('parking_lots').select('*').order('sort_order'),
       supabase.from('activity_reports').select('*').order('date', { ascending: false }),
     ]);
-    if (fpRes.data) setFireflyPoints(fpRes.data);
+    if (fpRes.data) {
+      setFireflyPoints(fpRes.data);
+      // 詳細テキストとステータスの初期値をセット
+      const descs = {};
+      const statuses = {};
+      fpRes.data.forEach(p => {
+        descs[p.id] = p.description || '';
+        statuses[p.id] = p.status || 'low';
+      });
+      setPointDescriptions(descs);
+      setPointStatuses(statuses);
+    }
     if (plRes.data) setParkingLots(plRes.data);
     if (rRes.data) setReports(rRes.data);
   }
@@ -140,13 +155,20 @@ export default function AdminPage() {
     setTimeout(() => setSuccessMessage(''), 3000);
   };
 
-  // 飛翔状況の更新
-  const updateFireflyStatus = async (id, newStatus) => {
+  // 飛翔状況の更新（ステータスと詳細テキストをまとめて更新）
+  const updateFireflyPoint = async (id) => {
     if (!updaterName) { alert('更新者の名前を入力してください'); return; }
+    const status = pointStatuses[id];
+    const description = pointDescriptions[id] || '';
     setSaving(true);
     await supabase
       .from('firefly_points')
-      .update({ status: newStatus, updated_at: new Date().toISOString(), updated_by: updaterName })
+      .update({ 
+        status, 
+        description,
+        updated_at: new Date().toISOString(), 
+        updated_by: updaterName 
+      })
       .eq('id', id);
     await fetchAll();
     setSaving(false);
@@ -306,16 +328,34 @@ export default function AdminPage() {
                     {point.updated_at && ` ・ ${formatJST(point.updated_at)}`}
                   </span>
                 </div>
-                <select
-                  value={point.status}
-                  onChange={(e) => updateFireflyStatus(point.id, e.target.value)}
-                  className="admin-select"
-                  disabled={saving}
-                >
-                  {statusOptions.firefly.map(opt => (
-                    <option key={opt.value} value={opt.value}>{opt.label}</option>
-                  ))}
-                </select>
+                <div className="admin-firefly-edit-group">
+                  <select
+                    value={pointStatuses[point.id] || point.status}
+                    onChange={(e) => setPointStatuses({ ...pointStatuses, [point.id]: e.target.value })}
+                    className="admin-select"
+                    disabled={saving}
+                  >
+                    {statusOptions.firefly.map(opt => (
+                      <option key={opt.value} value={opt.value}>{opt.label}</option>
+                    ))}
+                  </select>
+                  <div className="admin-desc-edit">
+                    <input
+                      type="text"
+                      value={pointDescriptions[point.id] || ''}
+                      onChange={(e) => setPointDescriptions({ ...pointDescriptions, [point.id]: e.target.value })}
+                      placeholder="詳細（例: 昨晩は20匹ほど確認）"
+                      className="admin-input desc-input"
+                    />
+                    <button
+                      onClick={() => updateFireflyPoint(point.id)}
+                      className="admin-btn secondary small"
+                      disabled={saving}
+                    >
+                      保存
+                    </button>
+                  </div>
+                </div>
               </div>
             ))}
           </div>
@@ -464,9 +504,10 @@ export default function AdminPage() {
         close={() => setLightboxOpen(false)}
         slides={[{ src: lightboxImage }]}
         plugins={[Zoom]}
+        zoom={{ maxZoomPixelRatio: 1 }}
         controller={{ closeOnBackdropClick: false }}
-        styles={{
-          container: { backgroundColor: "rgba(0, 0, 0, 0.9)" }
+        styles={{ 
+          container: { backgroundColor: "rgba(0, 0, 0, 0.9)" } 
         }}
         render={{
           buttonPrev: () => null,
