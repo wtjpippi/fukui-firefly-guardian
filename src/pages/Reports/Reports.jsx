@@ -145,6 +145,7 @@ export default function Reports() {
           <img
             src={lightboxUrl}
             alt="拡大表示"
+            onClick={(e) => e.stopPropagation()}
             style={{
               maxWidth: '90vw',
               maxHeight: '85vh',

@@ -449,7 +449,7 @@ export default function AdminPage() {
         {/* ライトボックス（クリック拡大） */}
         {lightboxUrl && (
           <div className="admin-lightbox" onClick={() => setLightboxUrl(null)}>
-            <img src={lightboxUrl} alt="拡大表示" />
+            <img src={lightboxUrl} alt="拡大表示" onClick={(e) => e.stopPropagation()} />
           </div>
         )}
       </div>

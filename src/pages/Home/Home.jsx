@@ -1,9 +1,23 @@
+import { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { MapPin, Calendar, ArrowRight, Footprints, LightbulbOff, CameraOff, Heart, Trees, Info, Sparkles, ExternalLink } from 'lucide-react';
-import { reports } from '../../data/mockData';
+import { supabase } from '../../lib/supabaseClient';
 import './Home.css';
 
 export default function Home() {
+  const [latestReports, setLatestReports] = useState([]);
+
+  useEffect(() => {
+    async function fetchLatestReports() {
+      const { data } = await supabase
+        .from('activity_reports')
+        .select('*')
+        .order('date', { ascending: false })
+        .limit(3);
+      if (data) setLatestReports(data);
+    }
+    fetchLatestReports();
+  }, []);
 
   const quickLinks = [
     { path: '/map', icon: '🗺️', title: 'ほたるマップ', desc: 'リアルタイム飛翔状況' },
@@ -17,8 +31,6 @@ export default function Home() {
     { path: '/access', icon: '🚗', title: 'アクセス', desc: '駐車場・交通案内' },
     { path: '/contact', icon: '✉️', title: 'お問い合わせ', desc: 'ご意見・ご質問' },
   ];
-
-  const latestReports = reports.slice(-3).reverse();
 
   return (
     <div className="page">
@@ -163,13 +175,24 @@ export default function Home() {
       {/* Latest Reports */}
       <section className="latest-reports container">
         <h2 className="section-title">最新の活動レポート</h2>
-        {latestReports.map(report => (
-          <div key={report.id} className="glass-card report-preview-card">
-            <div className="report-preview-date">{report.date} ・ {report.author}</div>
-            <div className="report-preview-title">{report.title}</div>
-            <div className="report-preview-excerpt">{report.content}</div>
+        {latestReports.length === 0 ? (
+          <div style={{ textAlign: 'center', padding: 'var(--space-xl)', color: 'var(--color-text-muted)', background: 'var(--color-bg-secondary)', borderRadius: 'var(--radius-md)' }}>
+            レポートはまだありません
           </div>
-        ))}
+        ) : (
+          latestReports.map(report => (
+            <div key={report.id} className="glass-card report-preview-card">
+              <div className="report-preview-date">{report.date} ・ {report.author}</div>
+              <h3 className="report-preview-title">{report.title}</h3>
+              <div style={{ display: 'flex', gap: 'var(--space-md)', alignItems: 'flex-start' }}>
+                {report.image_url && (
+                  <img src={report.image_url} alt="" style={{ width: '60px', height: '60px', objectFit: 'cover', borderRadius: 'var(--radius-sm)', flexShrink: 0 }} />
+                )}
+                <div className="report-preview-excerpt">{report.content}</div>
+              </div>
+            </div>
+          ))
+        )}
         <div style={{ textAlign: 'center', marginTop: 'var(--space-lg)' }}>
           <Link to="/reports" className="btn-glow">
             すべてのレポートを見る
