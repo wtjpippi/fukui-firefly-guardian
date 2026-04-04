@@ -106,8 +106,8 @@ export default function MapPage() {
     async function fetchData() {
       setIsLoading(true);
       const [fpRes, plRes] = await Promise.all([
-        supabase.from('firefly_points').select('*'),
-        supabase.from('parking_lots').select('*'),
+        supabase.from('firefly_points').select('*').order('sort_order'),
+        supabase.from('parking_lots').select('*').order('sort_order'),
       ]);
       if (fpRes.data) setFireflyPoints(fpRes.data);
       if (plRes.data) setParkingLots(plRes.data);

@@ -2,6 +2,13 @@ import { useState, useEffect } from 'react';
 import { supabase } from '../../lib/supabaseClient';
 import './Admin.css';
 
+// JST日時フォーマット（例: 2026/04/04 21:30）
+function formatJST(dateStr) {
+  if (!dateStr) return '';
+  const d = new Date(dateStr);
+  return d.toLocaleString('ja-JP', { timeZone: 'Asia/Tokyo', year: 'numeric', month: '2-digit', day: '2-digit', hour: '2-digit', minute: '2-digit' });
+}
+
 const statusOptions = {
   firefly: [
     { value: 'high', label: '🟢 乱舞中' },
@@ -19,11 +26,15 @@ const statusOptions = {
 const reportCategories = ['観測', '準備', 'お知らせ', 'イベント'];
 
 export default function AdminPage() {
-  const [isAuthenticated, setIsAuthenticated] = useState(false);
+  const [isAuthenticated, setIsAuthenticated] = useState(() => {
+    return sessionStorage.getItem('admin_authenticated') === 'true';
+  });
   const [passwordInput, setPasswordInput] = useState('');
   const [passwordError, setPasswordError] = useState('');
   const [activeTab, setActiveTab] = useState('firefly');
-  const [updaterName, setUpdaterName] = useState('');
+  const [updaterName, setUpdaterName] = useState(() => {
+    return localStorage.getItem('admin_updater_name') || '';
+  });
   const [fireflyPoints, setFireflyPoints] = useState([]);
   const [parkingLots, setParkingLots] = useState([]);
   const [reports, setReports] = useState([]);
@@ -31,7 +42,52 @@ export default function AdminPage() {
   const [successMessage, setSuccessMessage] = useState('');
 
   // 新規レポート用
-  const [newReport, setNewReport] = useState({ title: '', content: '', category: '観測' });
+  const [newReport, setNewReport] = useState({ title: '', content: '', category: '観測', date: new Date().toISOString().split('T')[0] });
+  const [imageFile, setImageFile] = useState(null);
+  const [imagePreview, setImagePreview] = useState(null);
+  const [lightboxUrl, setLightboxUrl] = useState(null);
+
+  // 画像を自動圧縮（最大800px幅、JPEG 80%品質）
+  const compressImage = (file) => {
+    return new Promise((resolve) => {
+      const reader = new FileReader();
+      reader.onload = (e) => {
+        const img = new Image();
+        img.onload = () => {
+          const canvas = document.createElement('canvas');
+          const MAX_WIDTH = 800;
+          let width = img.width;
+          let height = img.height;
+          if (width > MAX_WIDTH) {
+            height = (height * MAX_WIDTH) / width;
+            width = MAX_WIDTH;
+          }
+          canvas.width = width;
+          canvas.height = height;
+          const ctx = canvas.getContext('2d');
+          ctx.drawImage(img, 0, 0, width, height);
+          canvas.toBlob((blob) => resolve(blob), 'image/jpeg', 0.8);
+        };
+        img.src = e.target.result;
+      };
+      reader.readAsDataURL(file);
+    });
+  };
+
+  // 画像選択ハンドラ
+  const handleImageSelect = (e) => {
+    const file = e.target.files[0];
+    if (!file) return;
+    setImageFile(file);
+    const reader = new FileReader();
+    reader.onload = (ev) => setImagePreview(ev.target.result);
+    reader.readAsDataURL(file);
+  };
+
+  const clearImage = () => {
+    setImageFile(null);
+    setImagePreview(null);
+  };
 
   // パスワード認証
   const handleLogin = async (e) => {
@@ -44,11 +100,17 @@ export default function AdminPage() {
 
     if (data && data.value === passwordInput) {
       setIsAuthenticated(true);
+      sessionStorage.setItem('admin_authenticated', 'true');
       setPasswordError('');
     } else {
       setPasswordError('パスワードが正しくありません');
     }
   };
+
+  // 更新者名の保存
+  useEffect(() => {
+    localStorage.setItem('admin_updater_name', updaterName);
+  }, [updaterName]);
 
   // データの読み込み
   useEffect(() => {
@@ -58,8 +120,8 @@ export default function AdminPage() {
 
   async function fetchAll() {
     const [fpRes, plRes, rRes] = await Promise.all([
-      supabase.from('firefly_points').select('*'),
-      supabase.from('parking_lots').select('*'),
+      supabase.from('firefly_points').select('*').order('sort_order'),
+      supabase.from('parking_lots').select('*').order('sort_order'),
       supabase.from('activity_reports').select('*').order('date', { ascending: false }),
     ]);
     if (fpRes.data) setFireflyPoints(fpRes.data);
@@ -104,22 +166,48 @@ export default function AdminPage() {
     if (!updaterName) { alert('更新者の名前を入力してください'); return; }
     if (!newReport.title || !newReport.content) { alert('タイトルと内容を入力してください'); return; }
     setSaving(true);
+
+    let image_url = null;
+
+    // 画像がある場合はアップロード
+    if (imageFile) {
+      const compressed = await compressImage(imageFile);
+      const fileName = `report_${Date.now()}.jpg`;
+      const { error: uploadError } = await supabase.storage
+        .from('report-images')
+        .upload(fileName, compressed, { contentType: 'image/jpeg' });
+
+      if (!uploadError) {
+        const { data: urlData } = supabase.storage
+          .from('report-images')
+          .getPublicUrl(fileName);
+        image_url = urlData.publicUrl;
+      }
+    }
+
     await supabase.from('activity_reports').insert({
       title: newReport.title,
       content: newReport.content,
       category: newReport.category,
       author: updaterName,
-      date: new Date().toISOString().split('T')[0],
+      date: newReport.date,
+      image_url,
     });
-    setNewReport({ title: '', content: '', category: '観測' });
+    setNewReport({ title: '', content: '', category: '観測', date: new Date().toISOString().split('T')[0] });
+    clearImage();
     await fetchAll();
     setSaving(false);
     showSuccess('レポートを投稿しました');
   };
 
-  // レポートの削除
+  // レポートの削除（ストレージの画像も削除）
   const deleteReport = async (id) => {
     if (!confirm('このレポートを削除しますか？')) return;
+    const target = reports.find(r => r.id === id);
+    if (target?.image_url) {
+      const fileName = target.image_url.split('/').pop();
+      await supabase.storage.from('report-images').remove([fileName]);
+    }
     await supabase.from('activity_reports').delete().eq('id', id);
     await fetchAll();
     showSuccess('レポートを削除しました');
@@ -203,7 +291,8 @@ export default function AdminPage() {
                 <div className="admin-card-header">
                   <strong>{point.name}</strong>
                   <span className="admin-card-meta">
-                    {point.updated_by && `${point.updated_by} が更新`}
+                    {point.updated_by && `${point.updated_by}`}
+                    {point.updated_at && ` ・ ${formatJST(point.updated_at)}`}
                   </span>
                 </div>
                 <select
@@ -230,7 +319,8 @@ export default function AdminPage() {
                 <div className="admin-card-header">
                   <strong>{lot.id} {lot.name}</strong>
                   <span className="admin-card-meta">
-                    {lot.updated_by && `${lot.updated_by} が更新`}
+                    {lot.updated_by && `${lot.updated_by}`}
+                    {lot.updated_at && ` ・ ${formatJST(lot.updated_at)}`}
                   </span>
                 </div>
                 <select
@@ -253,15 +343,27 @@ export default function AdminPage() {
           <div className="admin-section">
             <h2>活動レポートの投稿</h2>
             <form onSubmit={submitReport} className="admin-report-form">
-              <select
-                value={newReport.category}
-                onChange={(e) => setNewReport({ ...newReport, category: e.target.value })}
-                className="admin-select"
-              >
-                {reportCategories.map(cat => (
-                  <option key={cat} value={cat}>{cat}</option>
-                ))}
-              </select>
+              <div className="admin-form-row">
+                <div className="admin-date-row">
+                  <label>日付</label>
+                  <input
+                    type="date"
+                    value={newReport.date}
+                    onChange={(e) => setNewReport({ ...newReport, date: e.target.value })}
+                    className="admin-input"
+                  />
+                </div>
+                <select
+                  value={newReport.category}
+                  onChange={(e) => setNewReport({ ...newReport, category: e.target.value })}
+                  className="admin-select"
+                  style={{ flex: '0 0 auto', width: 'auto' }}
+                >
+                  {reportCategories.map(cat => (
+                    <option key={cat} value={cat}>{cat}</option>
+                  ))}
+                </select>
+              </div>
               <input
                 type="text"
                 value={newReport.title}
@@ -274,29 +376,80 @@ export default function AdminPage() {
                 onChange={(e) => setNewReport({ ...newReport, content: e.target.value })}
                 placeholder="内容を入力..."
                 className="admin-textarea"
-                rows={4}
+                rows={3}
               />
+              <div className="admin-image-upload">
+                {imagePreview ? (
+                  <div className="admin-image-inline-preview">
+                    <img src={imagePreview} alt="プレビュー" />
+                    <button type="button" className="admin-btn danger" onClick={clearImage}>✕</button>
+                  </div>
+                ) : (
+                  <label className="admin-btn secondary">
+                    📷 写真を追加
+                    <input
+                      type="file"
+                      accept="image/*"
+                      capture="environment"
+                      onChange={handleImageSelect}
+                      style={{ display: 'none' }}
+                    />
+                  </label>
+                )}
+              </div>
               <button type="submit" className="admin-btn primary" disabled={saving}>
                 {saving ? '投稿中...' : '投稿する'}
               </button>
             </form>
 
             <h3 style={{ marginTop: 'var(--space-xl)' }}>投稿済みレポート</h3>
-            {reports.map(report => (
-              <div key={report.id} className="admin-card">
-                <div className="admin-card-header">
-                  <strong>{report.title}</strong>
-                  <span className="admin-card-meta">{report.date} ・ {report.author}</span>
+            {reports.map((report, index) => {
+              const reportYear = report.date.split('-')[0];
+              const prevReportYear = index > 0 ? reports[index - 1].date.split('-')[0] : null;
+              const showYearHeader = reportYear !== prevReportYear;
+              const isCurrentYear = reportYear === new Date().getFullYear().toString();
+
+              return (
+                <div key={report.id}>
+                  {showYearHeader && (
+                    <div className="admin-year-header">
+                      {reportYear}年度 {isCurrentYear && <span className="admin-current-badge">今年</span>}
+                    </div>
+                  )}
+                  <div className="admin-card">
+                    <div className="admin-card-header">
+                      <strong>{report.title}</strong>
+                      <span className="admin-card-meta">{report.date} ・ {report.author}</span>
+                    </div>
+                    <div className="admin-report-body">
+                      {report.image_url && (
+                        <img
+                          src={report.image_url}
+                          alt=""
+                          className="admin-report-thumb"
+                          onClick={() => setLightboxUrl(report.image_url)}
+                        />
+                      )}
+                      <p className="admin-card-content" style={{ margin: 0 }}>{report.content}</p>
+                    </div>
+                    <button
+                      className="admin-btn danger"
+                      onClick={() => deleteReport(report.id)}
+                      style={{ marginTop: 'var(--space-sm)' }}
+                    >
+                      削除
+                    </button>
+                  </div>
                 </div>
-                <p className="admin-card-content">{report.content}</p>
-                <button
-                  className="admin-btn danger"
-                  onClick={() => deleteReport(report.id)}
-                >
-                  削除
-                </button>
-              </div>
-            ))}
+              );
+            })}
+          </div>
+        )}
+
+        {/* ライトボックス（クリック拡大） */}
+        {lightboxUrl && (
+          <div className="admin-lightbox" onClick={() => setLightboxUrl(null)}>
+            <img src={lightboxUrl} alt="拡大表示" />
           </div>
         )}
       </div>

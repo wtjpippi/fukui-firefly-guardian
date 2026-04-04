@@ -51,7 +51,7 @@ function App() {
           <Route path="/local-guide" element={<LocalGuide />} />
           <Route path="/access" element={<Access />} />
           <Route path="/contact" element={<Contact />} />
-          <Route path="/admin" element={<AdminPage />} />
+          <Route path="/291staff" element={<AdminPage />} />
         </Routes>
       </main>
       <Footer />
