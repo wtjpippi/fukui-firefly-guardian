@@ -3,7 +3,7 @@
 export const fireflyPoints = [
   {
     id: 'point-hotaru-1',
-    name: '蛍観橋コース',
+    name: '蛍観橋コース　蛍観橋付近',
     lat: 37.760707,
     lng: 138.832346,
     course: '蛍観橋コース',

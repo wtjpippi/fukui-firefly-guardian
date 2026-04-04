@@ -38,7 +38,7 @@
 - [ ] ギャラリー画像のアップロード・管理
 
 ### データベース・リアルタイム
-- [ ] Supabase PostgreSQL によるデータ永続化
+- [x] Supabase PostgreSQL によるデータ永続化
 - [ ] Supabase Realtime によるマップ即時反映
 - [ ] Supabase Storage によるギャラリー画像管理
 
@@ -47,7 +47,7 @@
 - [ ] Googleフォームの実URL設定（鑑賞会予約・お問い合わせ）
 - [ ] Google Maps埋め込みの正確な座標設定
 - [x] マップ上の飛翔ポイント・駐車場の正確な座標調整
-- [x] 本番デプロイ（Vercel: https://fukuihotaru.vercel.app/）
+- [x] 本番デプロイ（Vercel・GitHub連携済み: https://fukuihotaru.vercel.app/）
 - [ ] お知らせ・ニュース（公式発表用）
 - [ ] 天気予報ウィジェット
 - [ ] PWA対応（ホーム画面追加）
