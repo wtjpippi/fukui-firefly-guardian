@@ -237,9 +237,8 @@ export default function MapPage() {
             <Marker position={[37.758621, 138.831192]} icon={createVenueIcon()}>
               <Popup>
                 <div style={{ color: '#333', textAlign: 'center' }}>
-                  <div style={{ fontSize: '10px', color: '#f97316', fontWeight: 'bold' }}>MAIN VENUE</div>
                   <strong style={{ fontSize: '14px' }}>福井ほたる祭り 会場</strong><br />
-                  <span style={{ fontSize: '12px' }}>（お祭り当日の本部・広場）</span>
+                  <span style={{ fontSize: '12px' }}>（お祭り当日の本部・出店）</span>
                 </div>
               </Popup>
             </Marker>
@@ -398,7 +397,7 @@ export default function MapPage() {
                 title="地図で見る"
               >
                 <MapPin size={14} />
-                <span>地図で見る</span>
+                <span>地図<span className="hide-mobile">で見る</span></span>
               </button>
               <span className={`badge ${parkingLabels[lot.status]?.badge}`}>
                 {lot.status !== 'normal' && <span className="live-dot" />}
