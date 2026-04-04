@@ -133,13 +133,17 @@ export default function Reports() {
           onClick={() => setLightboxUrl(null)}
           style={{
             position: 'fixed',
-            inset: 0,
-            background: 'rgba(0,0,0,0.85)',
+            top: 0,
+            left: 0,
+            width: '100vw',
+            height: '100vh',
+            background: 'rgba(0,0,0,0.9)',
             display: 'flex',
             justifyContent: 'center',
             alignItems: 'center',
             zIndex: 9999,
             cursor: 'pointer',
+            WebkitTapHighlightColor: 'transparent',
           }}
         >
           <img
@@ -147,12 +151,24 @@ export default function Reports() {
             alt="拡大表示"
             onClick={(e) => e.stopPropagation()}
             style={{
-              maxWidth: '90vw',
-              maxHeight: '85vh',
+              maxWidth: '95vw',
+              maxHeight: '95vh',
               borderRadius: 'var(--radius-md)',
               objectFit: 'contain',
+              boxShadow: '0 0 30px rgba(0,0,0,0.5)',
+              userSelect: 'none',
+              WebkitUserSelect: 'none',
             }}
           />
+          {/* 閉じるヒント */}
+          <div style={{
+            position: 'absolute',
+            top: '20px',
+            right: '20px',
+            color: 'white',
+            fontSize: 'var(--text-lg)',
+            padding: '10px'
+          }}>✕</div>
         </div>
       )}
     </div>
