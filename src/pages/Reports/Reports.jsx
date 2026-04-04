@@ -1,5 +1,8 @@
 import { useState, useEffect } from 'react';
 import { supabase } from '../../lib/supabaseClient';
+import Lightbox from "yet-another-react-lightbox";
+import "yet-another-react-lightbox/styles.css";
+import Zoom from "yet-another-react-lightbox/plugins/zoom";
 
 const categoryColors = {
   '観測': 'badge-high',
@@ -11,7 +14,8 @@ const categoryColors = {
 export default function Reports() {
   const [reports, setReports] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
-  const [lightboxUrl, setLightboxUrl] = useState(null);
+  const [lightboxOpen, setLightboxOpen] = useState(false);
+  const [lightboxImage, setLightboxImage] = useState(null);
   const [selectedYear, setSelectedYear] = useState(new Date().getFullYear().toString());
   const [availableYears, setAvailableYears] = useState([]);
 
@@ -22,14 +26,12 @@ export default function Reports() {
         .from('activity_reports')
         .select('*')
         .order('date', { ascending: false });
-      
+
       if (data) {
         setReports(data);
-        // ユニークな年度を抽出して降順に並べる
         const years = [...new Set(data.map(r => r.date.split('-')[0]))].sort((a, b) => b - a);
         setAvailableYears(years);
-        
-        // もしデータがあるのにselectedYearがリストにない（古いデータしかない場合など）は最新年を選択
+
         if (years.length > 0 && !years.includes(selectedYear)) {
           setSelectedYear(years[0]);
         }
@@ -41,6 +43,11 @@ export default function Reports() {
 
   const filteredReports = reports.filter(r => r.date.startsWith(selectedYear));
 
+  const openLightbox = (url) => {
+    setLightboxImage(url);
+    setLightboxOpen(true);
+  };
+
   return (
     <div className="page">
       <div className="container" style={{ paddingTop: 'var(--space-xl)', paddingBottom: 'var(--space-2xl)' }}>
@@ -48,10 +55,10 @@ export default function Reports() {
 
         {/* 年度セレクター */}
         {availableYears.length > 1 && (
-          <div style={{ 
-            display: 'flex', 
-            justifyContent: 'center', 
-            gap: 'var(--space-sm)', 
+          <div style={{
+            display: 'flex',
+            justifyContent: 'center',
+            gap: 'var(--space-sm)',
             marginBottom: 'var(--space-lg)',
             overflowX: 'auto',
             paddingBottom: '4px'
@@ -106,7 +113,7 @@ export default function Reports() {
                   <img
                     src={report.image_url}
                     alt=""
-                    onClick={() => setLightboxUrl(report.image_url)}
+                    onClick={() => openLightbox(report.image_url)}
                     style={{
                       width: '80px',
                       height: '80px',
@@ -115,6 +122,7 @@ export default function Reports() {
                       cursor: 'pointer',
                       flexShrink: 0,
                       border: '1px solid var(--color-border)',
+                      WebkitTapHighlightColor: 'transparent',
                     }}
                   />
                 )}
@@ -127,50 +135,20 @@ export default function Reports() {
         )}
       </div>
 
-      {/* ライトボックス */}
-      {lightboxUrl && (
-        <div
-          onClick={() => setLightboxUrl(null)}
-          style={{
-            position: 'fixed',
-            top: 0,
-            left: 0,
-            width: '100vw',
-            height: '100vh',
-            background: 'rgba(0,0,0,0.9)',
-            display: 'flex',
-            justifyContent: 'center',
-            alignItems: 'center',
-            zIndex: 9999,
-            cursor: 'pointer',
-            WebkitTapHighlightColor: 'transparent',
-          }}
-        >
-          <img
-            src={lightboxUrl}
-            alt="拡大表示"
-            onClick={(e) => e.stopPropagation()}
-            style={{
-              maxWidth: '95vw',
-              maxHeight: '95vh',
-              borderRadius: 'var(--radius-md)',
-              objectFit: 'contain',
-              boxShadow: '0 0 30px rgba(0,0,0,0.5)',
-              userSelect: 'none',
-              WebkitUserSelect: 'none',
-            }}
-          />
-          {/* 閉じるヒント */}
-          <div style={{
-            position: 'absolute',
-            top: '20px',
-            right: '20px',
-            color: 'white',
-            fontSize: 'var(--text-lg)',
-            padding: '10px'
-          }}>✕</div>
-        </div>
-      )}
+      <Lightbox
+        open={lightboxOpen}
+        close={() => setLightboxOpen(false)}
+        slides={[{ src: lightboxImage }]}
+        plugins={[Zoom]}
+        controller={{ closeOnBackdropClick: false }}
+        styles={{
+          container: { backgroundColor: "rgba(0, 0, 0, 0.9)" }
+        }}
+        render={{
+          buttonPrev: () => null,
+          buttonNext: () => null,
+        }}
+      />
     </div>
   );
 }

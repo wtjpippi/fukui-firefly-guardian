@@ -1,5 +1,8 @@
 import { useState, useEffect } from 'react';
 import { supabase } from '../../lib/supabaseClient';
+import Lightbox from "yet-another-react-lightbox";
+import "yet-another-react-lightbox/styles.css";
+import Zoom from "yet-another-react-lightbox/plugins/zoom";
 import './Admin.css';
 
 // JST日時フォーマット（例: 2026/04/04 21:30）
@@ -45,7 +48,10 @@ export default function AdminPage() {
   const [newReport, setNewReport] = useState({ title: '', content: '', category: '観測', date: new Date().toISOString().split('T')[0] });
   const [imageFile, setImageFile] = useState(null);
   const [imagePreview, setImagePreview] = useState(null);
-  const [lightboxUrl, setLightboxUrl] = useState(null);
+
+  // ライトボックス用
+  const [lightboxOpen, setLightboxOpen] = useState(false);
+  const [lightboxImage, setLightboxImage] = useState(null);
 
   // 画像を自動圧縮（最大800px幅、JPEG 80%品質）
   const compressImage = (file) => {
@@ -200,7 +206,7 @@ export default function AdminPage() {
     showSuccess('レポートを投稿しました');
   };
 
-  // レポートの削除（ストレージの画像も削除）
+  // レポートの削除
   const deleteReport = async (id) => {
     if (!confirm('このレポートを削除しますか？')) return;
     const target = reports.find(r => r.id === id);
@@ -211,6 +217,11 @@ export default function AdminPage() {
     await supabase.from('activity_reports').delete().eq('id', id);
     await fetchAll();
     showSuccess('レポートを削除しました');
+  };
+
+  const openLightbox = (url) => {
+    setLightboxImage(url);
+    setLightboxOpen(true);
   };
 
   // パスワード認証画面
@@ -427,7 +438,8 @@ export default function AdminPage() {
                           src={report.image_url}
                           alt=""
                           className="admin-report-thumb"
-                          onClick={() => setLightboxUrl(report.image_url)}
+                          onClick={() => openLightbox(report.image_url)}
+                          style={{ WebkitTapHighlightColor: 'transparent' }}
                         />
                       )}
                       <p className="admin-card-content" style={{ margin: 0 }}>{report.content}</p>
@@ -445,14 +457,22 @@ export default function AdminPage() {
             })}
           </div>
         )}
-
-        {/* ライトボックス（クリック拡大） */}
-        {lightboxUrl && (
-          <div className="admin-lightbox" onClick={() => setLightboxUrl(null)}>
-            <img src={lightboxUrl} alt="拡大表示" onClick={(e) => e.stopPropagation()} />
-          </div>
-        )}
       </div>
+
+      <Lightbox
+        open={lightboxOpen}
+        close={() => setLightboxOpen(false)}
+        slides={[{ src: lightboxImage }]}
+        plugins={[Zoom]}
+        controller={{ closeOnBackdropClick: false }}
+        styles={{
+          container: { backgroundColor: "rgba(0, 0, 0, 0.9)" }
+        }}
+        render={{
+          buttonPrev: () => null,
+          buttonNext: () => null,
+        }}
+      />
     </div>
   );
 }
