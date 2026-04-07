@@ -1,10 +1,10 @@
 import React, { useState, useRef, useEffect, useCallback } from 'react';
 import { MapContainer, TileLayer, Marker, Popup, LayersControl, useMapEvents } from 'react-leaflet';
 import L from 'leaflet';
-import { MapPin, Navigation, Compass } from 'lucide-react';
+import { MapPin, Navigation } from 'lucide-react';
 import { supabase } from '../../lib/supabaseClient';
 import { formatStatusTime, getLatestUpdate, getFormattedToday } from '../../utils/dateUtils';
-import { getGoogleMapsNavUrl, getBearing } from '../../utils/geoUtils';
+import { getGoogleMapsNavUrl } from '../../utils/geoUtils';
 import 'leaflet/dist/leaflet.css';
 import './Map.css';
 
@@ -110,15 +110,7 @@ function LocationPicker() {
   return null;
 }
 
-// 方向矢印の角度を矢印文字に変換
-function getArrowChar(angle) {
-  // 角度を8方位に分類
-  const normalized = ((angle % 360) + 360) % 360;
-  const arrows = ['↑', '↗', '→', '↘', '↓', '↙', '←', '↖'];
-  const index = Math.round(normalized / 45) % 8;
-  return arrows[index];
-}
-
+// ほたるマップページ
 export default function MapPage() {
   const [map, setMap] = useState(null);
   const [fireflyPoints, setFireflyPoints] = useState([]);
@@ -130,7 +122,6 @@ export default function MapPage() {
 
   // ナビゲーション関連
   const [compassHeading, setCompassHeading] = useState(null);
-  const [walkTarget, setWalkTarget] = useState(null);
 
   const markerRefs = useRef({});
   const compassListenerRef = useRef(null);
@@ -216,29 +207,53 @@ export default function MapPage() {
       setShouldFollowUser(false);
     };
 
+    const onZoomStart = () => {
+      setShouldFollowUser(false);
+    };
+
+    const onPopupOpen = (e) => {
+      // ユーザー自信のポップアップ以外が開いたら追従を停止
+      if (shouldFollowUser) {
+        setShouldFollowUser(false);
+      }
+    };
+
     map.on('locationfound', onLocationFound);
     map.on('locationerror', onLocationError);
     map.on('dragstart', onDragStart);
+    map.on('zoomstart', onZoomStart);
+    map.on('popupopen', onPopupOpen);
 
     return () => {
       map.off('locationfound', onLocationFound);
       map.off('locationerror', onLocationError);
       map.off('dragstart', onDragStart);
+      map.off('zoomstart', onZoomStart);
+      map.off('popupopen', onPopupOpen);
     };
   }, [map, shouldFollowUser]);
 
   const handleLocateUser = () => {
-    if (map) {
-      setIsLocating(true);
-      setShouldFollowUser(true);
-      map.locate({ setView: false, watch: true, enableHighAccuracy: true });
-      // GPS取得と同時にコンパスも開始
-      startCompass();
+    if (!map) return;
+
+    if (shouldFollowUser) {
+      // すでに追従中なら解除（トグル）
+      setShouldFollowUser(false);
+      return;
     }
+
+    // 追従開始
+    map.closePopup(); // 無限ループ（autoPanとの競合）を防ぐ
+    setIsLocating(true);
+    setShouldFollowUser(true);
+    map.locate({ setView: false, watch: true, enableHighAccuracy: true });
+    // GPS取得と同時にコンパスも開始
+    startCompass();
   };
 
   const handleJumpToLocation = (locationId, lat, lng) => {
     if (map) {
+      setShouldFollowUser(false); // ジャンプ時は追従解除
       map.flyTo([lat, lng], 16, {
         duration: 2,
         easeLinearity: 0.25
@@ -254,44 +269,8 @@ export default function MapPage() {
     }
   };
 
-  const handleStartWalkGuide = (name, lat, lng) => {
-    setWalkTarget({ name, lat, lng });
-    // GPSがまだなら開始
-    if (!userPosition && map) {
-      handleLocateUser();
-    } else {
-      startCompass();
-    }
-    // 地図をスクロールして見せる
-    const mapElement = document.querySelector('.map-container');
-    if (mapElement) {
-      mapElement.scrollIntoView({ behavior: 'smooth', block: 'center' });
-    }
-  };
-
-  const handleStopWalkGuide = () => {
-    setWalkTarget(null);
-  };
-
-  // 方向矢印の角度を計算
-  const getGuideArrowAngle = () => {
-    if (!userPosition || !walkTarget) return null;
-    // 目的地への方角（北=0°基準）
-    const bearing = getBearing(
-      userPosition.lat, userPosition.lng,
-      walkTarget.lat, walkTarget.lng
-    );
-    if (compassHeading !== null) {
-      // コンパスが使える場合：端末の向きからの相対角度
-      return (bearing - compassHeading + 360) % 360;
-    }
-    // コンパスが使えない場合：北基準の絶対角度を返す
-    return bearing;
-  };
-
   const latestUpdate = getLatestUpdate(fireflyPoints.map(p => ({ ...p, lastUpdated: p.updated_at })));
   const todayLabel = getFormattedToday();
-  const guideArrowAngle = getGuideArrowAngle();
 
   return (
     <div className="page map-page">
@@ -308,7 +287,7 @@ export default function MapPage() {
           <button
             className={`locate-button ${isLocating ? 'loading' : ''} ${shouldFollowUser ? 'active' : ''}`}
             onClick={handleLocateUser}
-            title={shouldFollowUser ? "追従中" : "現在地を表示"}
+            title={shouldFollowUser ? "追従を停止" : "現在地を表示"}
           >
             <Navigation
               size={20}
@@ -317,7 +296,7 @@ export default function MapPage() {
             />
             <span>
               {isLocating ? '取得中...' :
-                shouldFollowUser ? '追従中' :
+                shouldFollowUser ? '追従解除 ×' :
                   userPosition ? '現在地へ' : '現在地'}
             </span>
           </button>
@@ -485,15 +464,6 @@ export default function MapPage() {
                 <MapPin size={14} />
                 <span>地図<span className="hide-mobile">で見る</span></span>
               </button>
-              {userPosition && (
-                <button
-                  className="walk-button"
-                  onClick={() => handleStartWalkGuide(point.name, point.lat, point.lng)}
-                  title="ここへ歩く"
-                >
-                  <Compass size={14} />
-                </button>
-              )}
             </div>
             <div className="point-status">
               <span className={`badge ${statusLabels[point.status]?.badge}`}>
@@ -533,38 +503,6 @@ export default function MapPage() {
           </div>
         ))}
       </div>
-
-      {/* 歩行ガイドパネル */}
-      {walkTarget && (
-        <div className="walk-guide-panel">
-          <div className="guide-arrow-wrapper">
-            {guideArrowAngle !== null ? (
-              <span
-                className="guide-arrow"
-                style={{ transform: `rotate(${guideArrowAngle}deg)` }}
-              >
-                ↑
-              </span>
-            ) : (
-              <span className="guide-arrow">🧭</span>
-            )}
-          </div>
-          <div className="guide-info">
-            <div className="guide-destination">{walkTarget.name}</div>
-            <div className="guide-subtitle">
-              {compassHeading !== null
-                ? `方角: ${getArrowChar(guideArrowAngle)} — スマホの向きに連動中`
-                : userPosition
-                  ? '現在地を取得しました'
-                  : '現在地を取得中…'
-              }
-            </div>
-          </div>
-          <button className="guide-close-btn" onClick={handleStopWalkGuide}>
-            終了
-          </button>
-        </div>
-      )}
     </div>
   );
 }
