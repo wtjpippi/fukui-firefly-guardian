@@ -207,13 +207,16 @@ export default function MapPage() {
       setShouldFollowUser(false);
     };
 
-    const onZoomStart = () => {
-      setShouldFollowUser(false);
+    const onZoomStart = (e) => {
+      // 手動操作（マウス等）によるイベントの場合のみ解除
+      if (shouldFollowUser && e.originalEvent) {
+        setShouldFollowUser(false);
+      }
     };
 
     const onPopupOpen = (e) => {
-      // ユーザー自信のポップアップ以外が開いたら追従を停止
-      if (shouldFollowUser) {
+      // ユーザー自身のポップアップ以外が開いたら追従を停止
+      if (shouldFollowUser && e.popup.options.className !== 'user-location-popup') {
         setShouldFollowUser(false);
       }
     };
@@ -328,7 +331,7 @@ export default function MapPage() {
 
             {userPosition && (
               <Marker position={userPosition} icon={createUserIcon(compassHeading)}>
-                <Popup>現在地</Popup>
+                <Popup className="user-location-popup">現在地</Popup>
               </Marker>
             )}
             {fireflyPoints.map(point => (
