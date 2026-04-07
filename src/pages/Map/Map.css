@@ -497,3 +497,220 @@
   color: var(--color-text-secondary);
   margin-bottom: var(--space-lg);
 }
+
+/* ========================================
+   Google Maps ナビボタン
+   ======================================== */
+.nav-button {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  background: rgba(59, 130, 246, 0.15);
+  border: 1px solid rgba(59, 130, 246, 0.3);
+  color: #60a5fa;
+  padding: 6px 12px;
+  border-radius: var(--radius-full);
+  font-size: 11px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  backdrop-filter: blur(4px);
+  white-space: nowrap;
+  text-decoration: none;
+}
+
+.nav-button:hover {
+  background: rgba(59, 130, 246, 0.25);
+  border-color: #60a5fa;
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(59, 130, 246, 0.2);
+  color: #93bbfd;
+}
+
+/* 「ここへ歩く」ボタン */
+.walk-button {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  background: rgba(168, 85, 247, 0.15);
+  border: 1px solid rgba(168, 85, 247, 0.3);
+  color: #c084fc;
+  padding: 6px 12px;
+  border-radius: var(--radius-full);
+  font-size: 11px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  backdrop-filter: blur(4px);
+  white-space: nowrap;
+}
+
+.walk-button:hover {
+  background: rgba(168, 85, 247, 0.25);
+  border-color: #c084fc;
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(168, 85, 247, 0.2);
+}
+
+.walk-button:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+  transform: none;
+}
+
+/* ========================================
+   ユーザーアイコン ヘディングコーン（青い扇形）
+   ======================================== */
+.user-heading-cone {
+  position: absolute;
+  width: 50px;
+  height: 50px;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  pointer-events: none;
+  z-index: 0;
+}
+
+.user-heading-cone::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 0;
+  height: 0;
+  border-left: 18px solid transparent;
+  border-right: 18px solid transparent;
+  border-bottom: 40px solid rgba(59, 130, 246, 0.25);
+  filter: blur(2px);
+}
+
+/* ========================================
+   歩行ガイドパネル（画面下部固定）
+   ======================================== */
+.walk-guide-panel {
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  z-index: 1100;
+  background: rgba(15, 25, 15, 0.85);
+  backdrop-filter: blur(16px);
+  border-top: 1px solid rgba(200, 230, 78, 0.2);
+  padding: 16px 20px;
+  padding-bottom: max(16px, env(safe-area-inset-bottom));
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  animation: slide-up 0.3s ease-out;
+  box-shadow: 0 -4px 24px rgba(0, 0, 0, 0.5);
+}
+
+@keyframes slide-up {
+  from {
+    transform: translateY(100%);
+    opacity: 0;
+  }
+  to {
+    transform: translateY(0);
+    opacity: 1;
+  }
+}
+
+.guide-arrow-wrapper {
+  flex-shrink: 0;
+  width: 48px;
+  height: 48px;
+  border-radius: 50%;
+  background: rgba(168, 85, 247, 0.15);
+  border: 1px solid rgba(168, 85, 247, 0.3);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  position: relative;
+}
+
+.guide-arrow {
+  font-size: 24px;
+  transition: transform 0.15s ease-out;
+  color: #c084fc;
+  line-height: 1;
+}
+
+.guide-info {
+  flex: 1;
+  min-width: 0;
+}
+
+.guide-destination {
+  font-weight: 700;
+  font-size: var(--text-sm);
+  color: var(--color-text-primary);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.guide-subtitle {
+  font-size: var(--text-xs);
+  color: var(--color-text-muted);
+  margin-top: 2px;
+}
+
+.guide-close-btn {
+  flex-shrink: 0;
+  background: rgba(239, 68, 68, 0.15);
+  border: 1px solid rgba(239, 68, 68, 0.3);
+  color: #f87171;
+  padding: 8px 16px;
+  border-radius: var(--radius-full);
+  font-size: 12px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  white-space: nowrap;
+}
+
+.guide-close-btn:hover {
+  background: rgba(239, 68, 68, 0.3);
+  border-color: #f87171;
+}
+
+/* コンパス未対応時のフォールバック表示 */
+.guide-no-compass {
+  font-size: var(--text-xs);
+  color: var(--color-text-muted);
+  font-style: italic;
+}
+
+/* ========================================
+   カード内のボタングループ
+   ======================================== */
+.card-buttons {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+@media (max-width: 500px) {
+  .walk-guide-panel {
+    padding: 12px 16px;
+    padding-bottom: max(12px, env(safe-area-inset-bottom));
+    gap: 12px;
+  }
+
+  .guide-arrow-wrapper {
+    width: 40px;
+    height: 40px;
+  }
+
+  .guide-arrow {
+    font-size: 20px;
+  }
+
+  .guide-close-btn {
+    padding: 6px 12px;
+    font-size: 11px;
+  }
+}
