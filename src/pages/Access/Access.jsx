@@ -16,7 +16,7 @@ export default function Access() {
           marginBottom: 'var(--space-md)',
         }}>
           <iframe
-            src="https://www.google.com/maps?q=ほたるの里公園&z=15&output=embed"
+            src="https://maps.google.com/maps?q=新潟県新潟市西蒲区福井 ほたるの里公園&t=&z=15&ie=UTF8&iwloc=&output=embed"
             width="100%"
             height="450"
             style={{ border: 0, display: 'block' }}
