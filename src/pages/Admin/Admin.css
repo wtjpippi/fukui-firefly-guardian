@@ -275,47 +275,106 @@
   gap: var(--space-sm);
 }
 
-/* Image Upload */
-.admin-image-upload {
-  display: flex;
-  flex-direction: column;
+/* Multiple Image Upload */
+.admin-image-upload-multi {
+  margin-bottom: var(--space-md);
+}
+
+.admin-previews-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(100px, 1fr));
   gap: var(--space-sm);
+  margin-bottom: var(--space-sm);
 }
 
-.admin-btn.secondary {
-  background: var(--color-bg-primary);
-  color: var(--color-text-primary);
-  border: 1px dashed var(--color-border);
-  text-align: center;
-  cursor: pointer;
-  width: 100%;
-}
-
-.admin-btn.secondary:hover {
-  border-color: var(--color-firefly);
-  color: var(--color-firefly);
-}
-
-.admin-image-preview {
+.admin-preview-item {
   position: relative;
-  border-radius: var(--radius-md);
+  aspect-ratio: 1;
+  border-radius: var(--radius-sm);
   overflow: hidden;
   border: 1px solid var(--color-border);
 }
 
-.admin-report-thumb {
-  width: 80px;
-  height: 80px;
+.admin-preview-item img {
+  width: 100%;
+  height: 100%;
   object-fit: cover;
-  border-radius: var(--radius-sm);
-  margin-bottom: var(--space-sm);
-  cursor: pointer;
-  border: 1px solid var(--color-border);
-  transition: opacity 0.2s;
 }
 
-.admin-report-thumb:hover {
-  opacity: 0.8;
+.admin-preview-remove {
+  position: absolute;
+  top: 2px;
+  right: 2px;
+  width: 20px;
+  height: 20px;
+  background: rgba(239, 68, 68, 0.9);
+  color: white;
+  border: none;
+  border-radius: 50%;
+  font-size: 10px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 2;
+}
+
+.admin-add-image-placeholder {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  aspect-ratio: 1;
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px dashed var(--color-border);
+  border-radius: var(--radius-sm);
+  color: var(--color-text-muted);
+  font-size: 10px;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.admin-add-image-placeholder:hover {
+  border-color: var(--color-firefly);
+  color: var(--color-firefly);
+  background: rgba(200, 230, 78, 0.05);
+}
+
+.admin-help-text {
+  font-size: 10px;
+  color: var(--color-text-muted);
+  margin-top: 4px;
+}
+
+.admin-form-actions {
+  display: flex;
+  gap: var(--space-sm);
+  margin-top: var(--space-sm);
+}
+
+.admin-report-thumbs-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 4px;
+  width: 140px; /* 80pxから140pxに拡大 */
+  flex-shrink: 0;
+}
+
+.admin-report-thumb {
+  width: 100%;
+  aspect-ratio: 1;
+  object-fit: cover;
+  border-radius: 2px;
+  cursor: pointer;
+  border: 1px solid var(--color-border);
+}
+
+.admin-card-actions {
+  display: flex;
+  gap: var(--space-sm);
+  margin-top: var(--space-sm);
+  padding-top: var(--space-sm);
+  border-top: 1px solid rgba(255, 255, 255, 0.05);
 }
 
 /* Date Row */

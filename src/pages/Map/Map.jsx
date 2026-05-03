@@ -11,20 +11,21 @@ import './Map.css';
 const { BaseLayer } = LayersControl;
 
 const statusLabels = {
-  high: { label: '乱舞中', badge: 'badge-high' },
-  medium: { label: '少し見える', badge: 'badge-medium' },
+  peak: { label: '乱舞中', badge: 'badge-peak' },
+  high: { label: '数多い', badge: 'badge-high' },
+  medium: { label: '飛び始め', badge: 'badge-medium' },
   low: { label: 'まだ見えない', badge: 'badge-low' },
 };
 
 const parkingLabels = {
   normal: { label: '利用可', badge: 'badge-normal' },
-  available: { label: '空きあり', badge: 'badge-high' },
-  limited: { label: '残りわずか', badge: 'badge-medium' },
+  available: { label: '空きあり', badge: 'badge-peak' },
+  limited: { label: '残りわずか', badge: 'badge-high' },
   full: { label: '満車', badge: 'badge-full' },
 };
 
 function createFireflyIcon(status) {
-  const colors = { high: '#4ade80', medium: '#fbbf24', low: '#6b7280' };
+  const colors = { peak: '#10b981', high: '#eab308', medium: '#f97316', low: '#6b7280' };
   const color = colors[status] || colors.low;
 
   return L.divIcon({
@@ -161,7 +162,7 @@ export default function MapPage() {
 
     // iOS 13+ は permission request が必要
     if (typeof DeviceOrientationEvent !== 'undefined' &&
-        typeof DeviceOrientationEvent.requestPermission === 'function') {
+      typeof DeviceOrientationEvent.requestPermission === 'function') {
       DeviceOrientationEvent.requestPermission()
         .then(response => {
           if (response === 'granted') {
@@ -283,7 +284,7 @@ export default function MapPage() {
         </h1>
 
         <div className="last-updated-banner">
-          🔄 <strong>{todayLabel}</strong> 最終更新: {formatStatusTime(latestUpdate)} ─ ほたる保護監視員がリアルタイムで更新中
+          🔄 <strong>{todayLabel}</strong> 最終更新: {formatStatusTime(latestUpdate)} ─ 福井ほたる保護監視員がリアルタイムで更新中
         </div>
 
         <div className="map-container">
@@ -305,16 +306,16 @@ export default function MapPage() {
           </button>
           <MapContainer center={center} zoom={15.5} scrollWheelZoom={true} ref={setMap}>
             <LayersControl position="bottomleft">
-              <BaseLayer checked name="ダーク (標準)">
-                <TileLayer
-                  attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> &copy; <a href="https://carto.com/attributions">CARTO</a>'
-                  url="https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png"
-                />
-              </BaseLayer>
-              <BaseLayer name="航空写真 (現地確認用)">
+              <BaseLayer checked name="航空写真 (標準)">
                 <TileLayer
                   attribution='&copy; <a href="https://www.esri.com/">Esri</a>'
                   url="https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}"
+                />
+              </BaseLayer>
+              <BaseLayer name="ダークマップ">
+                <TileLayer
+                  attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> &copy; <a href="https://carto.com/attributions">CARTO</a>'
+                  url="https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png"
                 />
               </BaseLayer>
             </LayersControl>
@@ -403,15 +404,20 @@ export default function MapPage() {
               <div className="map-legend-sub">ほたるの飛翔状況 / 会場</div>
               <div className="map-legend-items">
                 <div className="map-legend-item">
-                  <span className="legend-dot high" /> 乱舞中
+                  <span className="legend-dot peak" /> 乱舞中
                 </div>
                 <div className="map-legend-item">
-                  <span className="legend-dot medium" /> 少し見える
+                  <span className="legend-dot high" /> 数多い
+                </div>
+                <div className="map-legend-item">
+                  <span className="legend-dot medium" /> 飛び始め
                 </div>
                 <div className="map-legend-item">
                   <span className="legend-dot low" /> まだ見えない
                 </div>
-                <div className="map-legend-item" style={{ marginLeft: '8px' }}>
+              </div>
+              <div className="map-legend-items" style={{ marginTop: '8px', borderTop: '1px solid rgba(255,255,255,0.1)', paddingTop: '8px' }}>
+                <div className="map-legend-item">
                   <span style={{ fontSize: '14px' }}>🏮</span> 祭り会場
                 </div>
               </div>

@@ -25,7 +25,7 @@ export default function Contact() {
             XXX-XXXX-XXXX
           </a>
           <p style={{ fontSize: 'var(--text-xs)', color: 'var(--color-text-muted)' }}>
-            ほたる保護監視員 事務局
+            福井ほたる保護監視員 事務局
           </p>
         </div>
 

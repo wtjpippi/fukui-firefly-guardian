@@ -37,7 +37,7 @@ export default function Footer() {
             <span className="footer-logo-text">福井ほたる祭り</span>
           </div>
           <p className="footer-description">
-            角田山麓の伏流水に育まれた源氏ぼたる。ほたる保護監視員を中心に、地域一丸となってこの美しい景観を守り続けています。
+            角田山麓の伏流水に育まれた源氏ぼたる。福井ほたる保護監視員を中心に、地域一丸となってこの美しい景観を守り続けています。
           </p>
           <div className="footer-sns">
             <span className="footer-sns-label">
@@ -91,7 +91,7 @@ export default function Footer() {
           <div className="footer-link-group">
             <h4 className="footer-sub-title">運営</h4>
             <ul className="footer-links">
-              <li className="footer-info-item">ほたる保護監視員 事務局</li>
+              <li className="footer-info-item">福井ほたる保護監視員 事務局</li>
               <li className="footer-info-item">(福井自治会内)</li>
               <li className="footer-info-item">新潟市西蒲区福井</li>
             </ul>
@@ -101,7 +101,7 @@ export default function Footer() {
       
       <div className="footer-bottom">
         <div className="footer-bottom-copy">
-          &copy; {new Date().getFullYear()} ほたる保護監視員. All Rights Reserved.
+          &copy; {new Date().getFullYear()} 福井ほたる保護監視員. All Rights Reserved.
         </div>
       </div>
 

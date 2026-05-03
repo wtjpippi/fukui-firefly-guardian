@@ -159,13 +159,18 @@ ol {
   font-weight: 500;
 }
 
+.badge-peak {
+  background: rgba(16, 185, 129, 0.15);
+  color: var(--color-status-peak);
+}
+
 .badge-high {
-  background: rgba(74, 222, 128, 0.15);
+  background: rgba(234, 179, 8, 0.15);
   color: var(--color-status-high);
 }
 
 .badge-medium {
-  background: rgba(251, 191, 36, 0.15);
+  background: rgba(249, 115, 22, 0.15);
   color: var(--color-status-medium);
 }
 

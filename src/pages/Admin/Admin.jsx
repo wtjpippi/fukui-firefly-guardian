@@ -14,8 +14,9 @@ function formatJST(dateStr) {
 
 const statusOptions = {
   firefly: [
-    { value: 'high', label: '🟢 乱舞中' },
-    { value: 'medium', label: '🟡 少し見える' },
+    { value: 'peak', label: '🟢 乱舞中' },
+    { value: 'high', label: '🟡 数多い' },
+    { value: 'medium', label: '🟠 飛び始め' },
     { value: 'low', label: '⚫ まだ見えない' },
   ],
   parking: [
@@ -48,14 +49,16 @@ export default function AdminPage() {
   const [pointStatuses, setPointStatuses] = useState({});
   const [pointDescriptions, setPointDescriptions] = useState({});
 
-  // 新規レポート用
+  // レポート用（新規・編集共通）
   const [newReport, setNewReport] = useState({ title: '', content: '', category: '観測', date: new Date().toISOString().split('T')[0] });
-  const [imageFile, setImageFile] = useState(null);
-  const [imagePreview, setImagePreview] = useState(null);
-  
+  const [imageFiles, setImageFiles] = useState([]); // Fileオブジェクトの配列
+  const [imagePreviews, setImagePreviews] = useState([]); // プレビューURL（または既存URL）の配列
+  const [editingReportId, setEditingReportId] = useState(null); // 編集中のレポートID
+
   // ライトボックス用
   const [lightboxOpen, setLightboxOpen] = useState(false);
-  const [lightboxImage, setLightboxImage] = useState(null);
+  const [lightboxImages, setLightboxImages] = useState([]);
+  const [lightboxIndex, setLightboxIndex] = useState(0);
 
   // 画像を自動圧縮（最大800px幅、JPEG 80%品質）
   const compressImage = (file) => {
@@ -86,17 +89,41 @@ export default function AdminPage() {
 
   // 画像選択ハンドラ
   const handleImageSelect = (e) => {
-    const file = e.target.files[0];
-    if (!file) return;
-    setImageFile(file);
-    const reader = new FileReader();
-    reader.onload = (ev) => setImagePreview(ev.target.result);
-    reader.readAsDataURL(file);
+    const files = Array.from(e.target.files);
+    if (!files.length) return;
+
+    // 最大4枚まで
+    const totalCount = imagePreviews.length + files.length;
+    if (totalCount > 4) {
+      alert('画像は最大4枚までです');
+      return;
+    }
+
+    const newFiles = [...imageFiles];
+    const newPreviews = [...imagePreviews];
+
+    files.forEach(file => {
+      newFiles.push(file);
+      const reader = new FileReader();
+      reader.onload = (ev) => {
+        setImagePreviews(prev => [...prev, ev.target.result]);
+      };
+      reader.readAsDataURL(file);
+    });
+
+    setImageFiles(prev => [...prev, ...files]);
   };
 
-  const clearImage = () => {
-    setImageFile(null);
-    setImagePreview(null);
+  const removeImage = (index) => {
+    setImageFiles(prev => prev.filter((_, i) => i !== index));
+    setImagePreviews(prev => prev.filter((_, i) => i !== index));
+  };
+
+  const clearForm = () => {
+    setNewReport({ title: '', content: '', category: '観測', date: new Date().toISOString().split('T')[0] });
+    setImageFiles([]);
+    setImagePreviews([]);
+    setEditingReportId(null);
   };
 
   // パスワード認証
@@ -136,7 +163,6 @@ export default function AdminPage() {
     ]);
     if (fpRes.data) {
       setFireflyPoints(fpRes.data);
-      // 詳細テキストとステータスの初期値をセット
       const descs = {};
       const statuses = {};
       fpRes.data.forEach(p => {
@@ -155,7 +181,7 @@ export default function AdminPage() {
     setTimeout(() => setSuccessMessage(''), 3000);
   };
 
-  // 飛翔状況の更新（ステータスと詳細テキストをまとめて更新）
+  // 飛翔状況の更新
   const updateFireflyPoint = async (id) => {
     if (!updaterName) { alert('更新者の名前を入力してください'); return; }
     const status = pointStatuses[id];
@@ -188,19 +214,26 @@ export default function AdminPage() {
     showSuccess('駐車場状況を更新しました');
   };
 
-  // レポートの投稿
+  // レポートの投稿・更新
   const submitReport = async (e) => {
     e.preventDefault();
     if (!updaterName) { alert('更新者の名前を入力してください'); return; }
     if (!newReport.title || !newReport.content) { alert('タイトルと内容を入力してください'); return; }
     setSaving(true);
 
-    let image_url = null;
+    const finalImageUrls = [];
 
-    // 画像がある場合はアップロード
-    if (imageFile) {
-      const compressed = await compressImage(imageFile);
-      const fileName = `report_${Date.now()}.jpg`;
+    // 既存のURL（プレビューに含まれているがFileオブジェクトではないもの）を保持
+    for (const preview of imagePreviews) {
+      if (typeof preview === 'string' && preview.startsWith('http')) {
+        finalImageUrls.push(preview);
+      }
+    }
+
+    // 新規画像をアップロード
+    for (const file of imageFiles) {
+      const compressed = await compressImage(file);
+      const fileName = `report_${Date.now()}_${Math.random().toString(36).substring(7)}.jpg`;
       const { error: uploadError } = await supabase.storage
         .from('report-images')
         .upload(fileName, compressed, { contentType: 'image/jpeg' });
@@ -209,40 +242,68 @@ export default function AdminPage() {
         const { data: urlData } = supabase.storage
           .from('report-images')
           .getPublicUrl(fileName);
-        image_url = urlData.publicUrl;
+        finalImageUrls.push(urlData.publicUrl);
       }
     }
 
-    await supabase.from('activity_reports').insert({
+    const reportData = {
       title: newReport.title,
       content: newReport.content,
       category: newReport.category,
       author: updaterName,
       date: newReport.date,
-      image_url,
-    });
-    setNewReport({ title: '', content: '', category: '観測', date: new Date().toISOString().split('T')[0] });
-    clearImage();
+      image_url: finalImageUrls[0] || null, // 互換性のため1枚目も保存
+      image_urls: finalImageUrls,
+    };
+
+    if (editingReportId) {
+      await supabase.from('activity_reports').update(reportData).eq('id', editingReportId);
+      showSuccess('レポートを更新しました');
+    } else {
+      await supabase.from('activity_reports').insert(reportData);
+      showSuccess('レポートを投稿しました');
+    }
+
+    clearForm();
     await fetchAll();
     setSaving(false);
-    showSuccess('レポートを投稿しました');
+  };
+
+  // 編集モードへの切り替え
+  const startEditReport = (report) => {
+    setEditingReportId(report.id);
+    setNewReport({
+      title: report.title,
+      content: report.content,
+      category: report.category,
+      date: report.date
+    });
+    setImageFiles([]); // 新規追加用なので空にする
+    setImagePreviews(report.image_urls || (report.image_url ? [report.image_url] : []));
+    setActiveTab('reports');
+    window.scrollTo({ top: 0, behavior: 'smooth' });
   };
 
   // レポートの削除
   const deleteReport = async (id) => {
     if (!confirm('このレポートを削除しますか？')) return;
     const target = reports.find(r => r.id === id);
-    if (target?.image_url) {
-      const fileName = target.image_url.split('/').pop();
+    
+    // ストレージからの画像削除（実運用ではURLからファイル名を抽出するのは慎重に）
+    const urls = target.image_urls || (target.image_url ? [target.image_url] : []);
+    for (const url of urls) {
+      const fileName = url.split('/').pop();
       await supabase.storage.from('report-images').remove([fileName]);
     }
+
     await supabase.from('activity_reports').delete().eq('id', id);
     await fetchAll();
     showSuccess('レポートを削除しました');
   };
 
-  const openLightbox = (url) => {
-    setLightboxImage(url);
+  const openLightbox = (images, index = 0) => {
+    setLightboxImages(images.map(src => ({ src })));
+    setLightboxIndex(index);
     setLightboxOpen(true);
   };
 
@@ -392,7 +453,7 @@ export default function AdminPage() {
         {/* レポートタブ */}
         {activeTab === 'reports' && (
           <div className="admin-section">
-            <h2>活動レポートの投稿</h2>
+            <h2>{editingReportId ? 'レポートを編集' : '活動レポートの投稿'}</h2>
             <form onSubmit={submitReport} className="admin-report-form">
               <div className="admin-form-row">
                 <div className="admin-date-row">
@@ -427,30 +488,41 @@ export default function AdminPage() {
                 onChange={(e) => setNewReport({ ...newReport, content: e.target.value })}
                 placeholder="内容を入力..."
                 className="admin-textarea"
-                rows={3}
+                rows={5}
               />
-              <div className="admin-image-upload">
-                {imagePreview ? (
-                  <div className="admin-image-inline-preview">
-                    <img src={imagePreview} alt="プレビュー" />
-                    <button type="button" className="admin-btn danger" onClick={clearImage}>✕</button>
-                  </div>
-                ) : (
-                  <label className="admin-btn secondary">
-                    📷 写真を追加
-                    <input
-                      type="file"
-                      accept="image/*"
-                      capture="environment"
-                      onChange={handleImageSelect}
-                      style={{ display: 'none' }}
-                    />
-                  </label>
+              <div className="admin-image-upload-multi">
+                <div className="admin-previews-grid">
+                  {imagePreviews.map((src, index) => (
+                    <div key={index} className="admin-preview-item">
+                      <img src={src} alt="プレビュー" />
+                      <button type="button" className="admin-preview-remove" onClick={() => removeImage(index)}>✕</button>
+                    </div>
+                  ))}
+                  {imagePreviews.length < 4 && (
+                    <label className="admin-add-image-placeholder">
+                      <span>＋ 写真を追加</span>
+                      <input
+                        type="file"
+                        accept="image/*"
+                        multiple
+                        onChange={handleImageSelect}
+                        style={{ display: 'none' }}
+                      />
+                    </label>
+                  )}
+                </div>
+                <p className="admin-help-text">最大4枚までアップロード可能です</p>
+              </div>
+              <div className="admin-form-actions">
+                <button type="submit" className="admin-btn primary" disabled={saving}>
+                  {saving ? '保存中...' : editingReportId ? '更新する' : '投稿する'}
+                </button>
+                {editingReportId && (
+                  <button type="button" className="admin-btn secondary" onClick={clearForm} disabled={saving}>
+                    キャンセル
+                  </button>
                 )}
               </div>
-              <button type="submit" className="admin-btn primary" disabled={saving}>
-                {saving ? '投稿中...' : '投稿する'}
-              </button>
             </form>
 
             <h3 style={{ marginTop: 'var(--space-xl)' }}>投稿済みレポート</h3>
@@ -459,6 +531,7 @@ export default function AdminPage() {
               const prevReportYear = index > 0 ? reports[index - 1].date.split('-')[0] : null;
               const showYearHeader = reportYear !== prevReportYear;
               const isCurrentYear = reportYear === new Date().getFullYear().toString();
+              const reportImages = report.image_urls || (report.image_url ? [report.image_url] : []);
 
               return (
                 <div key={report.id}>
@@ -473,24 +546,36 @@ export default function AdminPage() {
                       <span className="admin-card-meta">{report.date} ・ {report.author}</span>
                     </div>
                     <div className="admin-report-body">
-                      {report.image_url && (
-                        <img
-                          src={report.image_url}
-                          alt=""
-                          className="admin-report-thumb"
-                          onClick={() => openLightbox(report.image_url)}
-                          style={{ WebkitTapHighlightColor: 'transparent' }}
-                        />
+                      {reportImages.length > 0 && (
+                        <div className="admin-report-thumbs-grid">
+                          {reportImages.map((url, i) => (
+                            <img
+                              key={i}
+                              src={url}
+                              alt=""
+                              className="admin-report-thumb"
+                              onClick={() => openLightbox(reportImages, i)}
+                              style={{ WebkitTapHighlightColor: 'transparent' }}
+                            />
+                          ))}
+                        </div>
                       )}
-                      <p className="admin-card-content" style={{ margin: 0 }}>{report.content}</p>
+                      <p className="admin-card-content" style={{ margin: 0, whiteSpace: 'pre-wrap' }}>{report.content}</p>
                     </div>
-                    <button
-                      className="admin-btn danger"
-                      onClick={() => deleteReport(report.id)}
-                      style={{ marginTop: 'var(--space-sm)' }}
-                    >
-                      削除
-                    </button>
+                    <div className="admin-card-actions">
+                      <button
+                        className="admin-btn secondary small"
+                        onClick={() => startEditReport(report)}
+                      >
+                        編集
+                      </button>
+                      <button
+                        className="admin-btn danger small"
+                        onClick={() => deleteReport(report.id)}
+                      >
+                        削除
+                      </button>
+                    </div>
                   </div>
                 </div>
               );
@@ -502,7 +587,8 @@ export default function AdminPage() {
       <Lightbox
         open={lightboxOpen}
         close={() => setLightboxOpen(false)}
-        slides={[{ src: lightboxImage }]}
+        index={lightboxIndex}
+        slides={lightboxImages}
         plugins={[Zoom]}
         zoom={{ maxZoomPixelRatio: 1 }}
         controller={{ closeOnBackdropClick: false }}
@@ -510,8 +596,8 @@ export default function AdminPage() {
           container: { backgroundColor: "rgba(0, 0, 0, 0.9)" } 
         }}
         render={{
-          buttonPrev: () => null,
-          buttonNext: () => null,
+          buttonPrev: lightboxImages.length <= 1 ? () => null : undefined,
+          buttonNext: lightboxImages.length <= 1 ? () => null : undefined,
         }}
       />
     </div>

@@ -1,4 +1,6 @@
-import { MapPin, Car, Train, Clock } from 'lucide-react';
+import { MapPin, Car, Train, Clock, Map as MapIcon, ExternalLink } from 'lucide-react';
+import { Link } from 'react-router-dom';
+import { eventInfo } from '../../config/eventInfo';
 
 export default function Access() {
   return (
@@ -11,18 +13,42 @@ export default function Access() {
           borderRadius: 'var(--radius-lg)',
           overflow: 'hidden',
           border: '1px solid var(--color-border)',
-          marginBottom: 'var(--space-xl)',
+          marginBottom: 'var(--space-md)',
         }}>
           <iframe
-            src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d12600!2d138.91!3d37.766!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x0%3A0x0!2zMzfCsDQ1JzU3LjYiTiAxMzjCsDU0JzQ4LjAiRQ!5e0!3m2!1sja!2sjp!4v1234567890"
+            src="https://www.google.com/maps?q=37.758621,138.831192&z=15&output=embed"
             width="100%"
-            height="300"
+            height="450"
             style={{ border: 0, display: 'block' }}
             allowFullScreen=""
             loading="lazy"
             referrerPolicy="no-referrer-when-downgrade"
-            title="福井ほたる祭り会場マップ"
+            title="福井農村改善センター（お祭り会場）"
           />
+        </div>
+
+        {/* Firefly Map Link Button */}
+        <div style={{ marginBottom: 'var(--space-xl)' }}>
+          <Link 
+            to="/map" 
+            className="btn-glow" 
+            style={{ 
+              display: 'flex', 
+              alignItems: 'center', 
+              justifyContent: 'center',
+              gap: 'var(--space-sm)',
+              padding: 'var(--space-md)',
+              textDecoration: 'none',
+              width: '100%'
+            }}
+          >
+            <MapIcon size={20} />
+            ほたるマップ・駐車場情報を確認
+            <ExternalLink size={16} style={{ opacity: 0.7 }} />
+          </Link>
+          <p style={{ fontSize: 'var(--text-xs)', color: 'var(--color-text-secondary)', textAlign: 'center', marginTop: 'var(--space-xs)' }}>
+            ※駐車場の位置や交通規制エリアを確認できます
+          </p>
         </div>
 
         <div className="glass-card" style={{ marginBottom: 'var(--space-md)', padding: 'var(--space-lg)' }}>
@@ -65,7 +91,7 @@ export default function Access() {
             <h3 style={{ fontSize: 'var(--text-base)' }}>開催時間</h3>
           </div>
           <p style={{ fontSize: 'var(--text-sm)', color: 'var(--color-text-secondary)', lineHeight: '1.7' }}>
-            令和7年 6月21日（土）<br />
+            {eventInfo.festivalFullDate}<br />
             <strong style={{ color: 'var(--color-warm-light)', fontSize: 'var(--text-lg)' }}>17:00 〜 21:00</strong><br />
             <span style={{ color: 'var(--color-text-muted)' }}>※ 小雨決行</span>
           </p>

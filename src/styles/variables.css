@@ -19,8 +19,9 @@
   --color-warm-muted: #c4b89a;
 
   /* Status Colors */
-  --color-status-high: #4ade80;
-  --color-status-medium: #fbbf24;
+  --color-status-peak: #10b981;
+  --color-status-high: #eab308;
+  --color-status-medium: #f97316;
   --color-status-low: #6b7280;
   --color-status-full: #ef4444;
 

@@ -1,12 +1,16 @@
 
 import { schedule, vendors } from '../../data/mockData';
+import { eventInfo } from '../../config/eventInfo';
+import { Calendar } from 'lucide-react';
 import './Events.css';
 
 const vendorIcons = {
-  food: '🍡',
+  food: '🏮',
+  sweets: '🍡',
   drink: '🍺',
   sake: '🍶',
   kids: '🎠',
+  sauna: '♨️',
 };
 
 export default function Events() {
@@ -17,8 +21,19 @@ export default function Events() {
           🎭 イベント情報
         </h1>
 
+        <div className="hero-event-card glass-card" style={{ marginBottom: 'var(--space-2xl)' }}>
+          <div className="hero-event-info-group">
+            <div className="hero-event-label">{eventInfo.year}年度 開催情報</div>
+            <h2 className="hero-event-title">第{eventInfo.festivalEdition}回 福井ほたる祭り</h2>
+            <div className="hero-event-date">
+              <Calendar size={14} />
+              {eventInfo.festivalFullDate}
+            </div>
+          </div>
+        </div>
+
         {/* Schedule */}
-        <h2 className="section-title">当日のスケジュール</h2>
+        <h2 className="section-title">ほたる祭り当日のスケジュール</h2>
         <div className="schedule-timeline">
           {schedule.map((item, i) => (
             <div key={i} className="schedule-item">
@@ -48,7 +63,13 @@ export default function Events() {
                 )}
                 <div className="vendor-items">
                   {v.items.map((item, i) => (
-                    <span key={i} className="vendor-item-tag">{item}</span>
+                    item === 'BR' ? (
+                      <div key={i} style={{ flexBasis: '100%', height: 0, margin: 0 }}></div>
+                    ) : item === 'ほか' ? (
+                      <span key={i} style={{ fontSize: 'var(--text-xs)', color: 'var(--color-text-muted)', alignSelf: 'center', marginLeft: '2px' }}>ほか</span>
+                    ) : (
+                      <span key={i} className="vendor-item-tag">{item}</span>
+                    )
                   ))}
                 </div>
               </div>
@@ -56,16 +77,6 @@ export default function Events() {
           ))}
         </div>
 
-        {/* Jonnobikan */}
-        <div className="glass-card" style={{ textAlign: 'center', padding: 'var(--space-xl)' }}>
-          <h3 style={{ marginBottom: 'var(--space-md)' }}>🏛️ じょんのび館</h3>
-          <p style={{ fontSize: 'var(--text-sm)', color: 'var(--color-text-secondary)', lineHeight: '1.7' }}>
-            ほたる祭り会場にて<br />
-            <strong style={{ color: 'var(--color-firefly)' }}>貸しタオルセット</strong>と
-            <strong style={{ color: 'var(--color-firefly)' }}>当日無料チケット</strong>を配布！<br />
-            お祭りの後は温泉でゆっくりどうぞ
-          </p>
-        </div>
       </div>
     </div>
   );

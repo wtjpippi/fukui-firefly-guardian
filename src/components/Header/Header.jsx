@@ -25,8 +25,8 @@ export default function Header() {
       <header className="header">
         <Link to="/" className="header-logo">
           {/* public/icons フォルダ内の custom-logo.png を読み込みます */}
-          <img src="/icons/custom-logo.png" alt="福井ほたる祭り ロゴ" className="header-logo-icon-img" />
-          <span className="header-logo-text">福井ほたる祭り</span>
+          <img src="/icons/custom-logo.png" alt="福井のほたる ロゴ" className="header-logo-icon-img" />
+          <span className="header-logo-text">福井のほたる</span>
         </Link>
 
         <nav className="desktop-nav">

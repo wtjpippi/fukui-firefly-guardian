@@ -198,6 +198,11 @@
   border-radius: 50%;
 }
 
+.legend-dot.peak {
+  background: var(--color-status-peak);
+  box-shadow: 0 0 6px var(--color-status-peak);
+}
+
 .legend-dot.high {
   background: var(--color-status-high);
   box-shadow: 0 0 6px var(--color-status-high);
@@ -213,11 +218,11 @@
 }
 
 .legend-dot.available {
-  background: var(--color-status-high);
+  background: var(--color-status-peak);
 }
 
 .legend-dot.limited {
-  background: var(--color-status-medium);
+  background: var(--color-status-high);
 }
 
 .legend-dot.full {
