@@ -16,7 +16,7 @@ export default function Access() {
           marginBottom: 'var(--space-md)',
         }}>
           <iframe
-            src="https://www.google.com/maps?q=37.758621,138.831192&z=15&output=embed"
+            src="https://www.google.com/maps/embed?pb=!1m17!1m12!1m3!1d3154.556488346618!2d138.831192!3d37.758621!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m2!1m1!2zMzfCsDQ1JzMxLjAiTiAxMzjCsDQ5JzUyLjMiRQ!5e0!3m2!1sja!2sjp!4v1715500000000"
             width="100%"
             height="450"
             style={{ border: 0, display: 'block' }}
