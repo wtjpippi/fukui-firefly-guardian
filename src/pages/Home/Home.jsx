@@ -22,12 +22,12 @@ export default function Home() {
 
   const quickLinks = [
     { path: '/map', icon: '🗺️', title: 'ほたるマップ', desc: 'リアルタイム飛翔状況' },
-    { path: '/events', icon: '🎭', title: 'イベント', desc: 'ほたる祭り情報' },
+    { path: '/events', icon: '🏮', title: 'イベント', desc: 'ほたる祭り情報' },
 
     { path: '/gallery', icon: '📸', title: 'ギャラリー', desc: '歴史と思い出' },
     { path: '/local-guide', icon: '🏞️', title: '地域紹介', desc: '福井の魅力と銘店' },
     { path: '/reports', icon: '📑', title: '活動レポート', desc: '保護活動の記録' },
-    { path: '/coupon', icon: '🎟️', title: '来場特典', desc: 'お得なクーポン' },
+    { path: '/coupon', icon: '🎁', title: '来場特典', desc: 'アンケートやお楽しみ企画' },
     { path: '/faq', icon: '❓', title: 'FAQ', desc: 'よくある質問' },
     { path: '/access', icon: '🚗', title: 'アクセス', desc: '駐車場・交通案内' },
     { path: '/contact', icon: '✉️', title: 'お問い合わせ', desc: 'ご意見・ご質問' },
