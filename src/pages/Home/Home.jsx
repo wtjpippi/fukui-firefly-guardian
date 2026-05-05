@@ -62,9 +62,10 @@ export default function Home() {
               </div>
               <div className="reservation-card-right">
                 <div className="reservation-info">
+                  場所: ほたるの里公園 ほたる案内所<br />
                   集合: 19:30 ／ 終了: 20:45<br />
-                  地元ガイドがほたるの生態を解説しながら<br />
-                  観賞コースをご案内します
+                  参加費: 無料 ／ 定員: 各日20名<br />
+                  地元ガイドがほたるの生態を解説しながらご案内します
                 </div>
                 <a
                   href="https://docs.google.com/forms/d/e/1FAIpQLSfuBonebE4miSo-8r2O-W86cZVpqo7rWJ1WfJTdGLRQFdPDbA/viewform"

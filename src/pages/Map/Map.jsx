@@ -94,6 +94,82 @@ function createVenueIcon() {
   });
 }
 
+function createLandmarkIcon(icon, label, currentZoom) {
+  const showText = currentZoom >= 17;
+  
+  return L.divIcon({
+    className: 'custom-marker landmark-marker',
+    html: `<div style="display: flex; flex-direction: column; align-items: center;">
+      <div style="
+        width: 30px; height: 30px;
+        background: rgba(255, 255, 255, 0.4);
+        backdrop-filter: blur(2px);
+        border-radius: 50%;
+        display: flex; align-items: center; justify-content: center;
+        font-size: 18px;
+        box-shadow: 0 0 10px rgba(59, 130, 246, 0.3);
+      ">${icon}</div>
+      ${showText ? `
+      <div style="
+        background: rgba(0, 0, 0, 0.5);
+        backdrop-filter: blur(2px);
+        color: white;
+        font-size: 10px;
+        padding: 2px 8px;
+        border-radius: 4px;
+        margin-top: 4px;
+        white-space: nowrap;
+        font-weight: bold;
+        box-shadow: 0 2px 6px rgba(0,0,0,0.2);
+      ">${label}</div>
+      ` : ''}
+    </div>`,
+    iconSize: [60, 50],
+    iconAnchor: [30, 15],
+  });
+}
+
+function createCourseLabelIcon(label, currentZoom) {
+  if (currentZoom < 17) {
+    return L.divIcon({ className: 'course-label-hidden', html: '' });
+  }
+
+  const opacity = 0.6;
+  const fontSize = '18px';
+  
+  return L.divIcon({
+    className: 'course-label-marker',
+    html: `<div style="
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      width: 100%;
+      height: 100%;
+      color: var(--color-firefly);
+      opacity: ${opacity};
+      font-size: ${fontSize};
+      font-weight: 800;
+      white-space: nowrap;
+      letter-spacing: 0.5em;
+      transform: rotate(37deg);
+      pointer-events: none;
+      text-shadow: 0 0 3px rgba(0,0,0,0.5);
+      text-align: center;
+    ">${label}</div>`,
+    iconSize: [250, 40],
+    iconAnchor: [125, 20],
+  });
+}
+
+function MapObserver({ onZoomChange }) {
+  useMapEvents({
+    zoomend: (e) => {
+      onZoomChange(e.target.getZoom());
+    },
+  });
+  return null;
+}
+
 function LocationPicker() {
   useMapEvents({
     click(e) {
@@ -108,6 +184,7 @@ function LocationPicker() {
       });
     },
   });
+
   return null;
 }
 
@@ -120,6 +197,7 @@ export default function MapPage() {
   const [isLocating, setIsLocating] = useState(false);
   const [shouldFollowUser, setShouldFollowUser] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
+  const [currentZoom, setCurrentZoom] = useState(15.5);
 
   // ナビゲーション関連
   const [compassHeading, setCompassHeading] = useState(null);
@@ -319,6 +397,7 @@ export default function MapPage() {
                 />
               </BaseLayer>
             </LayersControl>
+            <MapObserver onZoomChange={setCurrentZoom} />
             {import.meta.env.DEV && <LocationPicker />}
 
             <Marker position={[37.758621, 138.831192]} icon={createVenueIcon()}>
@@ -329,6 +408,55 @@ export default function MapPage() {
                 </div>
               </Popup>
             </Marker>
+
+            <Marker position={[37.759431, 138.832115]} icon={createLandmarkIcon('♨️', 'じょんのび館', currentZoom)}>
+              <Popup>
+                <div style={{ color: '#333' }}>
+                  <strong style={{ fontSize: '14px' }}>じょんのび館</strong><br />
+                  <span style={{ fontSize: '12px' }}>日帰り温泉・サウナ・お食事</span><br />
+                  <small style={{ color: '#666' }}>※お祭りの前後にもおすすめです</small>
+                </div>
+              </Popup>
+            </Marker>
+
+            <Marker position={[37.761067, 138.832158]} icon={createLandmarkIcon('🌉', '蛍観橋', currentZoom)}>
+              <Popup>
+                <div style={{ color: '#333' }}>
+                  <strong style={{ fontSize: '14px' }}>蛍観橋（けいかんばし）</strong>
+                </div>
+              </Popup>
+            </Marker>
+
+            <Marker position={[37.757828, 138.834937]} icon={createLandmarkIcon('🌉', '源氏橋', currentZoom)}>
+              <Popup>
+                <div style={{ color: '#333' }}>
+                  <strong style={{ fontSize: '14px' }}>源氏橋（げんじばし）</strong>
+                </div>
+              </Popup>
+            </Marker>
+
+            <Marker position={[37.756798, 138.835194]} icon={createLandmarkIcon('🌉', 'イモ穴橋', currentZoom)}>
+              <Popup>
+                <div style={{ color: '#333' }}>
+                  <strong style={{ fontSize: '14px' }}>イモ穴橋（いもあなばし）</strong>
+                </div>
+              </Popup>
+            </Marker>
+
+            <Marker position={[37.755700, 138.835757]} icon={createLandmarkIcon('🌉', '平家橋', currentZoom)}>
+              <Popup>
+                <div style={{ color: '#333' }}>
+                  <strong style={{ fontSize: '14px' }}>平家橋（へいけばし）</strong>
+                </div>
+              </Popup>
+            </Marker>
+
+            {/* 堂ノ腰コースの透かしラベル (固定位置) */}
+            <Marker 
+              position={[37.757003, 138.833327]} 
+              icon={createCourseLabelIcon('堂ノ腰コース', currentZoom)}
+              interactive={false}
+            />
 
             {userPosition && (
               <Marker position={userPosition} icon={createUserIcon(compassHeading)}>

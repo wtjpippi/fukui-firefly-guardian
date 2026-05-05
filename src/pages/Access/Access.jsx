@@ -6,7 +6,7 @@ export default function Access() {
   return (
     <div className="page">
       <div className="container" style={{ paddingTop: 'var(--space-xl)', paddingBottom: 'var(--space-2xl)' }}>
-        <h1 className="section-title">🚗 アクセス</h1>
+        <h1 className="section-title">🚗 {eventInfo.festivalName} 当日のアクセス</h1>
 
         {/* Google Maps embed */}
         <div style={{
@@ -53,12 +53,24 @@ export default function Access() {
 
         <div className="glass-card" style={{ marginBottom: 'var(--space-md)', padding: 'var(--space-lg)' }}>
           <div style={{ display: 'flex', alignItems: 'center', gap: 'var(--space-sm)', marginBottom: 'var(--space-md)' }}>
+            <Clock size={18} style={{ color: 'var(--color-firefly)' }} />
+            <h3 style={{ fontSize: 'var(--text-base)' }}>第{eventInfo.festivalEdition}回 ほたる祭り 開催日時</h3>
+          </div>
+          <p style={{ fontSize: 'var(--text-sm)', color: 'var(--color-text-secondary)', lineHeight: '1.7' }}>
+            {eventInfo.festivalFullDate}<br />
+            <strong style={{ color: 'var(--color-warm-light)', fontSize: 'var(--text-lg)' }}>{eventInfo.festivalTime}</strong><br />
+            <span style={{ color: 'var(--color-text-muted)' }}>※ 小雨決行</span>
+          </p>
+        </div>
+
+        <div className="glass-card" style={{ marginBottom: 'var(--space-md)', padding: 'var(--space-lg)' }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: 'var(--space-sm)', marginBottom: 'var(--space-md)' }}>
             <MapPin size={18} style={{ color: 'var(--color-firefly)' }} />
             <h3 style={{ fontSize: 'var(--text-base)' }}>会場所在地</h3>
           </div>
           <p style={{ fontSize: 'var(--text-sm)', color: 'var(--color-text-secondary)', lineHeight: '1.7' }}>
-            新潟県新潟市西蒲区福井<br />
-            矢垂川沿い
+            {eventInfo.venueAddress}<br />
+            <strong>{eventInfo.venueName}</strong>（矢垂川沿い）
           </p>
         </div>
 
@@ -68,33 +80,25 @@ export default function Access() {
             <h3 style={{ fontSize: 'var(--text-base)' }}>お車でお越しの方</h3>
           </div>
           <ul style={{ fontSize: 'var(--text-sm)', color: 'var(--color-text-secondary)', lineHeight: '2' }}>
-            <li>・ 北陸自動車道 巻潟東ICから約20分</li>
-            <li>・ 無料駐車場あり（満車時は臨時駐車場あり）</li>
-            <li>・ <span style={{ color: 'var(--color-firefly)' }}>当サイトのほたるマップで駐車場空き状況を確認できます</span></li>
-          </ul>
-        </div>
-
-        <div className="glass-card" style={{ marginBottom: 'var(--space-md)', padding: 'var(--space-lg)' }}>
-          <div style={{ display: 'flex', alignItems: 'center', gap: 'var(--space-sm)', marginBottom: 'var(--space-md)' }}>
-            <Train size={18} style={{ color: 'var(--color-firefly)' }} />
-            <h3 style={{ fontSize: 'var(--text-base)' }}>公共交通機関</h3>
-          </div>
-          <ul style={{ fontSize: 'var(--text-sm)', color: 'var(--color-text-secondary)', lineHeight: '2' }}>
-            <li>・ JR越後線「岩室駅」下車、タクシーで約10分</li>
-            <li>・ 岩室温泉からシャトルバス運行予定</li>
+            <li>・ 北陸自動車道 <strong>巻潟東ICから約20分</strong></li>
+            <li>・ <strong>会場周辺に駐車場がございます</strong>（すべて無料）</li>
+            <li>
+              ・ <Link to="/map" style={{ color: 'var(--color-firefly)', fontWeight: 'bold', textDecoration: 'underline' }}>
+                ほたるマップで駐車場の場所・空き状況を確認
+              </Link>
+            </li>
           </ul>
         </div>
 
         <div className="glass-card" style={{ padding: 'var(--space-lg)' }}>
           <div style={{ display: 'flex', alignItems: 'center', gap: 'var(--space-sm)', marginBottom: 'var(--space-md)' }}>
-            <Clock size={18} style={{ color: 'var(--color-firefly)' }} />
-            <h3 style={{ fontSize: 'var(--text-base)' }}>開催時間</h3>
+            <Train size={18} style={{ color: 'var(--color-firefly)' }} />
+            <h3 style={{ fontSize: 'var(--text-base)' }}>公共交通機関</h3>
           </div>
-          <p style={{ fontSize: 'var(--text-sm)', color: 'var(--color-text-secondary)', lineHeight: '1.7' }}>
-            {eventInfo.festivalFullDate}<br />
-            <strong style={{ color: 'var(--color-warm-light)', fontSize: 'var(--text-lg)' }}>17:00 〜 21:00</strong><br />
-            <span style={{ color: 'var(--color-text-muted)' }}>※ 小雨決行</span>
-          </p>
+          <ul style={{ fontSize: 'var(--text-sm)', color: 'var(--color-text-secondary)', lineHeight: '2' }}>
+            <li>・ JR越後線「巻駅」よりタクシーで約15分</li>
+            <li>・ JR越後線「岩室駅」よりタクシーで約10分</li>
+          </ul>
         </div>
       </div>
     </div>
