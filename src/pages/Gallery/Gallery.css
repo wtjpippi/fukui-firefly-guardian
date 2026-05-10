@@ -54,24 +54,6 @@
   opacity: 1;
 }
 
-.gallery-item:hover .gallery-item-info {
-  opacity: 1;
-}
-
-/* スマホ・タブレットでは常にタイトルを表示 */
-@media (max-width: 768px) {
-  .gallery-item-info {
-    opacity: 1 !important;
-    background: linear-gradient(to top, rgba(0, 0, 0, 0.8) 0%, rgba(0, 0, 0, 0) 100%) !important;
-  }
-  
-  .gallery-item-title {
-    opacity: 1 !important;
-    transform: translateY(0) !important;
-    font-size: 0.9rem;
-  }
-}
-
 .gallery-item-title {
   color: #fff;
   font-size: var(--text-sm);
@@ -82,6 +64,57 @@
 
 .gallery-item:hover .gallery-item-title {
   transform: translateY(0);
+}
+
+/* PC/モバイルの出し分け用 */
+.pc-only {
+  display: flex;
+}
+
+.mobile-only {
+  display: none;
+}
+
+.gallery-mobile-label {
+  color: var(--color-text-secondary);
+  font-size: 0.8rem;
+  font-weight: 600;
+  padding: 8px 4px 4px;
+  text-align: left;
+  line-height: 1.4;
+  letter-spacing: 0.02em;
+}
+
+@media (max-width: 768px) {
+  .pc-only {
+    display: none !important;
+  }
+  
+  .mobile-only {
+    display: block !important;
+  }
+  
+  .gallery-item {
+    aspect-ratio: auto;
+    background: transparent;
+    border: none;
+    box-shadow: none;
+    overflow: visible !important;
+    margin-bottom: var(--space-xl); /* 次のセットとの間の大きな余白 */
+  }
+
+  .gallery-mobile-label {
+    padding: 6px 4px 0; /* 画像との間を詰め、上部の余白を調整 */
+    font-size: 0.85rem;
+    color: var(--color-text-secondary);
+    letter-spacing: 0.03em;
+  }
+
+  .gallery-image {
+    aspect-ratio: 4/3;
+    border-radius: var(--radius-lg);
+    border: 1px solid var(--color-border);
+  }
 }
 
 /* Archive Section */

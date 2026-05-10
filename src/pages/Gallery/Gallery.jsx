@@ -51,8 +51,13 @@ export default function Gallery() {
                       onClick={() => openLightbox(recentData.images, idx)}
                     >
                       <img src={img.url} alt={img.alt} className="gallery-image" />
-                      <div className="gallery-overlay">
+                      {/* PC用ホバーオーバーレイ */}
+                      <div className="gallery-overlay pc-only">
                         <span className="gallery-item-title">{img.title}</span>
+                      </div>
+                      {/* モバイル用常時表示ラベル */}
+                      <div className="gallery-mobile-label mobile-only">
+                        {img.title}
                       </div>
                     </div>
                   ))}
