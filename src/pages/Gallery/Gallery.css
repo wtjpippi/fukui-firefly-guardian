@@ -101,6 +101,11 @@
     box-shadow: none;
     overflow: visible !important;
     margin-bottom: var(--space-xl); /* 次のセットとの間の大きな余白 */
+    transform: none !important; /* スマホでは浮き上がりを無効化 */
+  }
+
+  .gallery-item:hover {
+    transform: none !important;
   }
 
   .gallery-mobile-label {
@@ -114,6 +119,11 @@
     aspect-ratio: 4/3;
     border-radius: var(--radius-lg);
     border: 1px solid var(--color-border);
+    transform: none !important; /* スマホでは画像拡大を無効化 */
+  }
+  
+  .gallery-item:hover .gallery-image {
+    transform: none !important;
   }
 }
 
