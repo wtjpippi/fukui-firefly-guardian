@@ -373,7 +373,7 @@ export default function MapPage() {
             <div className="guide-badge live">リアルタイム</div>
             <div className="guide-content">
               <span className="guide-target">✨ ほたるの飛翔状況</span>
-              <p className="guide-desc">監視員が現地から最新状況を更新しています。</p>
+              <p className="guide-desc">ほたる保護監視員が現地から最新状況を更新しています。</p>
             </div>
           </div>
           <div className="guide-item">
@@ -538,7 +538,7 @@ export default function MapPage() {
                     ) : (
                       lot.hint && (
                         <div style={{ fontSize: '11px', color: '#666', background: '#f5f5f5', padding: '6px', borderRadius: '4px', marginBottom: '8px', lineHeight: '1.4' }}>
-                          💡 <span style={{ fontWeight: '700' }}>【お祭り当日】</span>{lot.hint}
+                          💡 {lot.hint}
                         </div>
                       )
                     )}
@@ -683,7 +683,7 @@ export default function MapPage() {
                 {lot.name}
               </div>
               <div className="parking-capacity">{lot.capacity}台 ・ {lot.walk_time}</div>
-              {lot.hint && <div className="parking-hint">💡 <span style={{ fontWeight: '700' }}>【お祭り当日】</span>{lot.hint}</div>}
+              {lot.hint && <div className="parking-hint">💡 {lot.hint}</div>}
             </div>
             <div className="parking-actions">
               <button
