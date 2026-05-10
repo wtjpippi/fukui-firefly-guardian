@@ -10,6 +10,9 @@ import './Map.css';
 
 const { BaseLayer } = LayersControl;
 
+// 駐車場リアルタイム更新機能の有効化フラグ (今年度はfalse)
+const PARKING_REALTIME_ENABLED = false;
+
 const statusLabels = {
   peak: { label: '乱舞中', badge: 'badge-peak' },
   high: { label: '数多い', badge: 'badge-high' },
@@ -58,7 +61,11 @@ function createUserIcon(heading) {
 
 function createParkingIcon(status, label) {
   const colors = { normal: '#94a3b8', available: '#4ade80', limited: '#fbbf24', full: '#ef4444' };
-  const color = colors[status] || colors.normal;
+  
+  // リアルタイム無効時は常にノーマル色
+  const color = PARKING_REALTIME_ENABLED 
+    ? (colors[status] || colors.normal) 
+    : colors.normal;
 
   return L.divIcon({
     className: 'custom-marker',
@@ -361,8 +368,25 @@ export default function MapPage() {
           🗺️ ほたるマップ
         </h1>
 
+        <div className="map-info-guide">
+          <div className="guide-item">
+            <div className="guide-badge live">リアルタイム</div>
+            <div className="guide-content">
+              <span className="guide-target">✨ ほたるの飛翔状況</span>
+              <p className="guide-desc">監視員が現地から最新状況を更新しています。</p>
+            </div>
+          </div>
+          <div className="guide-item">
+            <div className="guide-badge static">例年の傾向</div>
+            <div className="guide-content">
+              <span className="guide-target">🅿️ 駐車場情報</span>
+              <p className="guide-desc">お祭り当日の混雑目安を表示しています。</p>
+            </div>
+          </div>
+        </div>
+
         <div className="last-updated-banner">
-          🔄 <strong>{todayLabel}</strong> 最終更新: {formatStatusTime(latestUpdate)} ─ 福井ほたる保護監視員がリアルタイムで更新中
+          🔄 <strong>{todayLabel}</strong> ほたる飛翔状況: {formatStatusTime(latestUpdate)}
         </div>
 
         <div className="map-container">
@@ -500,17 +524,36 @@ export default function MapPage() {
                 icon={createParkingIcon(lot.status, lot.id)}
               >
                 <Popup>
-                  <div style={{ color: '#333', minWidth: '160px' }}>
-                    <strong>🅿️ {lot.id} {lot.name}</strong><br />
-                    <span>{parkingLabels[lot.status]?.label}</span><br />
-                    <small>収容台数: {lot.capacity}台 ・ {lot.walk_time}</small>
+                  <div style={{ color: '#333', minWidth: '180px' }}>
+                    <div style={{ fontWeight: '700', fontSize: '14px', marginBottom: '4px' }}>
+                      🅿️ {lot.id} {lot.name}
+                    </div>
+
+                    {PARKING_REALTIME_ENABLED ? (
+                      <div style={{ marginBottom: '8px' }}>
+                        <span className={`badge ${parkingLabels[lot.status]?.badge}`} style={{ fontSize: '11px', padding: '2px 8px' }}>
+                          {parkingLabels[lot.status]?.label}
+                        </span>
+                      </div>
+                    ) : (
+                      lot.hint && (
+                        <div style={{ fontSize: '11px', color: '#666', background: '#f5f5f5', padding: '6px', borderRadius: '4px', marginBottom: '8px', lineHeight: '1.4' }}>
+                          💡 <span style={{ fontWeight: '700' }}>【お祭り当日】</span>{lot.hint}
+                        </div>
+                      )
+                    )}
+
+                    <div style={{ fontSize: '12px', color: '#555', marginBottom: '8px' }}>
+                      収容台数: {lot.capacity}台 ・ {lot.walk_time}
+                    </div>
+
                     <div style={{ marginTop: '8px', display: 'flex', gap: '6px' }}>
                       <a
                         href={getGoogleMapsNavUrl(lot.lat, lot.lng, 'driving')}
                         target="_blank"
                         rel="noopener noreferrer"
                         className="nav-button"
-                        style={{ fontSize: '11px', padding: '4px 10px' }}
+                        style={{ fontSize: '11px', padding: '4px 12px' }}
                       >
                         🚗 ナビで行く
                       </a>
@@ -548,30 +591,45 @@ export default function MapPage() {
                 <div className="map-legend-item">
                   <span style={{ fontSize: '14px' }}>🏮</span> 祭り会場
                 </div>
+                <div className="map-legend-item">
+                  <span style={{ fontSize: '14px' }}>♨️</span> じょんのび館
+                </div>
+                <div className="map-legend-item">
+                  <span style={{ fontSize: '14px' }}>🌉</span> 主な橋
+                </div>
               </div>
             </div>
 
             <div className="map-legend-group">
-              <div className="map-legend-sub">駐車場の空き状況</div>
+              <div className="map-legend-sub">駐車場の案内</div>
               <div className="map-legend-items">
                 <div className="map-legend-item">
-                  <span className="legend-dot normal" style={{ borderRadius: '3px', background: '#94a3b8' }} /> 利用可
+                  <span className="legend-dot normal" style={{ borderRadius: '3px', background: '#94a3b8' }} /> 駐車場 (P1〜P8)
                 </div>
-                <div className="map-legend-item">
-                  <span className="live-dot" style={{ position: 'relative', top: 'auto', left: 'auto', marginRight: '4px' }} /> ライブ更新中
-                </div>
+                {PARKING_REALTIME_ENABLED && (
+                  <div className="map-legend-item">
+                    <span className="live-dot" style={{ position: 'relative', top: 'auto', left: 'auto', marginRight: '4px' }} /> ライブ更新中
+                  </div>
+                )}
               </div>
-              <div className="map-legend-items" style={{ marginTop: '8px', borderTop: '1px solid rgba(255,255,255,0.1)', paddingTop: '8px' }}>
-                <div className="map-legend-item">
-                  <span className="legend-dot available" style={{ borderRadius: '3px' }} /> 空きあり
+              
+              {PARKING_REALTIME_ENABLED ? (
+                <div className="map-legend-items" style={{ marginTop: '8px', borderTop: '1px solid rgba(255,255,255,0.1)', paddingTop: '8px' }}>
+                  <div className="map-legend-item">
+                    <span className="legend-dot available" style={{ borderRadius: '3px' }} /> 空きあり
+                  </div>
+                  <div className="map-legend-item">
+                    <span className="legend-dot limited" style={{ borderRadius: '3px' }} /> 残りわずか
+                  </div>
+                  <div className="map-legend-item">
+                    <span className="legend-dot full" style={{ borderRadius: '3px' }} /> 満車
+                  </div>
                 </div>
-                <div className="map-legend-item">
-                  <span className="legend-dot limited" style={{ borderRadius: '3px' }} /> 残りわずか
+              ) : (
+                <div style={{ marginTop: '8px', borderTop: '1px solid rgba(255,255,255,0.1)', paddingTop: '8px', fontSize: '10px', color: 'var(--color-text-muted)' }}>
+                  ※ 満車情報は「お祭り当日」の傾向です。詳細は各項目をご確認ください。
                 </div>
-                <div className="map-legend-item">
-                  <span className="legend-dot full" style={{ borderRadius: '3px' }} /> 満車
-                </div>
-              </div>
+              )}
             </div>
           </div>
         </div>
@@ -612,7 +670,11 @@ export default function MapPage() {
         ))}
 
         <h2 className="map-section-title">🅿️ 駐車場（P1〜P8）</h2>
-        <p className="map-section-note">※ 駐車場の空き状況は、ほたる祭り当日のみリアルタイムで更新されます。</p>
+        <p className="map-section-note">
+          {PARKING_REALTIME_ENABLED 
+            ? '※ 駐車場の空き状況は、ほたる祭り当日のみリアルタイムで更新されます。' 
+            : '※ 以下の混雑目安は「お祭り当日」の傾向です。期間外は各駐車場ともスムーズにご利用いただけます。'}
+        </p>
         {parkingLots.map(lot => (
           <div key={lot.id} className="glass-card parking-card">
             <div className="parking-info">
@@ -621,7 +683,7 @@ export default function MapPage() {
                 {lot.name}
               </div>
               <div className="parking-capacity">{lot.capacity}台 ・ {lot.walk_time}</div>
-              {lot.hint && <div className="parking-hint">💡 {lot.hint}</div>}
+              {lot.hint && <div className="parking-hint">💡 <span style={{ fontWeight: '700' }}>【お祭り当日】</span>{lot.hint}</div>}
             </div>
             <div className="parking-actions">
               <button
@@ -632,10 +694,12 @@ export default function MapPage() {
                 <MapPin size={14} />
                 <span>地図<span className="hide-mobile">で見る</span></span>
               </button>
-              <span className={`badge ${parkingLabels[lot.status]?.badge}`}>
-                {lot.status !== 'normal' && <span className="live-dot" />}
-                {parkingLabels[lot.status]?.label}
-              </span>
+              {PARKING_REALTIME_ENABLED && (
+                <span className={`badge ${parkingLabels[lot.status]?.badge}`}>
+                  {lot.status !== 'normal' && <span className="live-dot" />}
+                  {parkingLabels[lot.status]?.label}
+                </span>
+              )}
             </div>
           </div>
         ))}

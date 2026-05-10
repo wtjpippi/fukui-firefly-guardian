@@ -29,12 +29,12 @@ export default function Access() {
 
         {/* Firefly Map Link Button */}
         <div style={{ marginBottom: 'var(--space-xl)' }}>
-          <Link 
-            to="/map" 
-            className="btn-glow" 
-            style={{ 
-              display: 'flex', 
-              alignItems: 'center', 
+          <Link
+            to="/map"
+            className="btn-glow"
+            style={{
+              display: 'flex',
+              alignItems: 'center',
               justifyContent: 'center',
               gap: 'var(--space-sm)',
               padding: 'var(--space-md)',
@@ -47,7 +47,7 @@ export default function Access() {
             <ExternalLink size={16} style={{ opacity: 0.7 }} />
           </Link>
           <p style={{ fontSize: 'var(--text-xs)', color: 'var(--color-text-secondary)', textAlign: 'center', marginTop: 'var(--space-xs)' }}>
-            ※駐車場の位置や交通規制エリアを確認できます
+            ※駐車場の位置や会場までの徒歩時間を確認できます
           </p>
         </div>
 

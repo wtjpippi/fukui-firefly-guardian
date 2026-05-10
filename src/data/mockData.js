@@ -362,27 +362,23 @@ export const reports = [
 
 export const galleryData = [
   {
-    year: 2025,
-    title: '第31回',
-    description: 'ほたるの出現数が多く、多くの来場者で賑わいました。',
-    images: [],
-  },
-  {
-    year: 2024,
-    title: '第30回 記念大会',
-    description: '30回目の節目を迎えた記念大会。過去最多の来場者数を記録。',
-    images: [],
-  },
-  {
-    year: 2023,
-    title: '第29回',
-    description: '好天に恵まれ、多くのほたるが観賞できました。',
-    images: [],
-  },
-  {
-    year: 2022,
-    title: '第28回',
-    description: '3年ぶりの通常開催。多くの来場者で賑わいました。',
-    images: [],
-  },
+    year: 'Recent',
+    title: '近年の開催の様子',
+    description: '灯籠に描かれた子供たちの絵や、香ばしい屋台の匂い、そして勇壮な神楽の演舞。ほたるを守る監視員の活動など、お祭りを支える人々の姿も収めた大切な記録です。',
+    images: [
+      { url: '/images/gallery/recent/photo-1.jpg', alt: '地域の子供たちが書いた灯籠', title: '子供たちの想いが灯る灯籠' },
+      { url: '/images/gallery/recent/photo-2.jpg', alt: 'ほたる保護監視員の活動', title: 'ほたるを守る、監視員の活動' },
+      { url: '/images/gallery/recent/photo-3.jpg', alt: 'ほたる観賞会', title: 'ガイド付きほたる観賞会' },
+      { url: '/images/gallery/recent/photo-4.jpg', alt: '地元のお店が出店してるほたる茶屋', title: '地元グルメが並ぶ「ほたる茶屋」' },
+      { url: '/images/gallery/recent/photo-5.jpg', alt: 'ほたる茶屋の賑わい', title: '賑わう出店コーナー' },
+      { url: '/images/gallery/recent/photo-6.jpg', alt: 'けんさ焼き', title: '名物・けんさ焼き' },
+      { url: '/images/gallery/recent/photo-7.jpg', alt: '鮎の塩焼き', title: '香ばしく焼き上がる鮎の塩焼き' },
+      { url: '/images/gallery/recent/photo-8.jpg', alt: '会場の雰囲気 1', title: '会場風景 1' },
+      { url: '/images/gallery/recent/photo-9.jpg', alt: '会場の雰囲気 2', title: '会場風景 2' },
+      { url: '/images/gallery/recent/photo-10.jpg', alt: '会場の雰囲気 3', title: '会場風景 3' },
+      { url: '/images/gallery/recent/photo-11.jpg', alt: '神楽倶楽舞の神楽舞 1', title: '福井神楽倶楽舞による神楽舞 1' },
+      { url: '/images/gallery/recent/photo-12.jpg', alt: '神楽倶楽舞の神楽舞 2', title: '福井神楽倶楽舞による神楽舞 2' },
+    ],
+    isRecent: true
+  }
 ];

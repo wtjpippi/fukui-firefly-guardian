@@ -1,76 +1,110 @@
+import { useState } from 'react';
+import Lightbox from 'yet-another-react-lightbox';
+import 'yet-another-react-lightbox/styles.css';
 import { galleryData } from '../../data/mockData';
+import './Gallery.css';
 
 export default function Gallery() {
+  const [index, setIndex] = useState(-1);
+  const [currentImages, setCurrentImages] = useState([]);
+
+  // 最新年度（Recent）とそれ以外（Archive）に分ける
+  const recentData = galleryData.find(d => d.year === 'Recent');
+  const archiveData = galleryData.filter(d => d.year !== 'Recent');
+
+  const openLightbox = (images, photoIndex) => {
+    setCurrentImages(images.map(img => ({ src: img.url, alt: img.alt, title: img.title })));
+    setIndex(photoIndex);
+  };
+
   return (
     <div className="page">
-      <div className="container" style={{ paddingTop: 'var(--space-xl)', paddingBottom: 'var(--space-2xl)' }}>
-        <h1 className="section-title">📸 ギャラリー</h1>
-
-        <div className="glass-card" style={{ textAlign: 'center', padding: 'var(--space-xl)', marginBottom: 'var(--space-xl)' }}>
-          <p style={{ fontSize: 'var(--text-sm)', color: 'var(--color-text-secondary)', lineHeight: '1.7' }}>
-            福井ほたる祭りの歩みを振り返ります。<br />
-            30年以上にわたり、地域の皆さまとともにほたるを守り続けてきました。
+      <div className="container" style={{ paddingBottom: 'var(--space-3xl)' }}>
+        
+        <header className="gallery-hero">
+          <h1 className="section-title">📸 ほたる祭りの風景</h1>
+          <p style={{ fontSize: 'var(--text-base)', color: 'var(--color-text-secondary)', maxWidth: '600px', margin: '0 auto' }}>
+            30年以上にわたり受け継がれてきた福井の初夏の風物詩。<br />
+            地域に愛され続けるお祭りの魅力と歩みを、写真で振り返ります。
           </p>
-        </div>
+        </header>
 
-        {galleryData.map((yearData) => (
-          <div key={yearData.year} style={{ marginBottom: 'var(--space-xl)' }}>
-            <div className="glass-card">
-              <div style={{ display: 'flex', alignItems: 'center', gap: 'var(--space-md)', marginBottom: 'var(--space-md)' }}>
-                <span style={{
-                  fontFamily: 'var(--font-display)',
-                  fontSize: 'var(--text-2xl)',
-                  fontWeight: '700',
-                  color: 'var(--color-firefly)',
-                }}>
-                  {yearData.year}
-                </span>
-                <span style={{
-                  fontSize: 'var(--text-sm)',
-                  color: 'var(--color-text-muted)',
-                }}>
-                  {yearData.title}
-                </span>
+        {/* Latest / Featured Section */}
+        {recentData && (
+          <section style={{ marginBottom: 'var(--space-3xl)' }}>
+            <div className="glass-card" style={{ padding: 'var(--space-xl)' }}>
+              <div style={{ marginBottom: 'var(--space-xl)' }}>
+                <h2 style={{ fontFamily: 'var(--font-display)', color: 'var(--color-firefly)', fontSize: 'var(--text-2xl)', marginBottom: 'var(--space-xs)' }}>
+                  {recentData.title}
+                </h2>
+                <p style={{ fontSize: 'var(--text-sm)', color: 'var(--color-text-muted)' }}>
+                  {recentData.description}
+                </p>
               </div>
-              <p style={{
-                fontSize: 'var(--text-sm)',
-                color: 'var(--color-text-secondary)',
-                marginBottom: 'var(--space-md)',
-                lineHeight: '1.7',
-              }}>
-                {yearData.description}
-              </p>
-              {/* Placeholder for future images */}
-              <div style={{
-                display: 'grid',
-                gridTemplateColumns: 'repeat(3, 1fr)',
-                gap: 'var(--space-sm)',
-              }}>
-                {[1, 2, 3].map(i => (
-                  <div key={i} style={{
-                    aspectRatio: '1',
-                    background: 'var(--color-bg-secondary)',
-                    borderRadius: 'var(--radius-md)',
-                    display: 'flex',
-                    alignItems: 'center',
-                    justifyContent: 'center',
-                    fontSize: 'var(--text-2xl)',
-                    opacity: 0.4,
-                  }}>
-                    🌿
-                  </div>
-                ))}
-              </div>
+
+              {recentData.images.length > 0 ? (
+                <div className="gallery-grid">
+                  {recentData.images.map((img, idx) => (
+                    <div 
+                      key={idx} 
+                      className="gallery-item"
+                      onClick={() => openLightbox(recentData.images, idx)}
+                    >
+                      <img src={img.url} alt={img.alt} className="gallery-image" />
+                      <div className="gallery-overlay">
+                        <span className="gallery-item-title">{img.title}</span>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              ) : (
+                <div className="placeholder-gallery">
+                  <span style={{ fontSize: '3rem' }}>📷</span>
+                  <p>写真は準備中です。お楽しみに！</p>
+                </div>
+              )}
             </div>
-          </div>
-        ))}
+          </section>
+        )}
 
-        <div className="glass-card" style={{ textAlign: 'center', padding: 'var(--space-xl)' }}>
-          <p style={{ fontSize: 'var(--text-sm)', color: 'var(--color-text-muted)' }}>
-            写真は今後追加予定です 📷
-          </p>
-        </div>
-      </div>
-    </div>
+        {/* Archive Section */}
+        {archiveData.length > 0 && (
+          <section className="archive-section">
+            <h2 className="archive-title">🕯️ 過去の歩み</h2>
+            <div className="archive-grid">
+              {archiveData.map((yearData) => (
+                <div key={yearData.year} className="glass-card archive-card">
+                  <div className="archive-year">{yearData.year}</div>
+                  <h3 style={{ fontSize: 'var(--text-base)', marginBottom: 'var(--space-sm)' }}>{yearData.title}</h3>
+                  <p style={{ fontSize: 'var(--text-sm)', color: 'var(--color-text-secondary)', lineHeight: '1.6', marginBottom: 'var(--space-md)' }}>
+                    {yearData.description}
+                  </p>
+                  {yearData.images.length > 0 ? (
+                    <button 
+                      className="btn-glow" 
+                      style={{ fontSize: 'var(--text-xs)', padding: '6px 12px' }}
+                      onClick={() => openLightbox(yearData.images, 0)}
+                    >
+                      写真を見る
+                    </button>
+                  ) : (
+                    <span style={{ fontSize: 'var(--text-xs)', color: 'var(--color-text-muted)' }}>
+                      写真は今後追加予定です
+                    </span>
+                  )}
+                </div>
+              ))}
+            </div>
+          </section>
+        )}
+      </div> {/* containerの閉じタグ */}
+
+      <Lightbox
+        index={index}
+        open={index >= 0}
+        close={() => setIndex(-1)}
+        slides={currentImages}
+      />
+    </div> // pageの閉じタグ
   );
 }
