@@ -324,7 +324,7 @@ export const faqData = [
   },
 ];
 
-// 監視員レポート（モック）
+// 保護監視員レポート（モック）
 export const reports = [
   {
     id: 'report-1',
@@ -364,10 +364,10 @@ export const galleryData = [
   {
     year: 'Recent',
     title: '近年の開催の様子',
-    description: '灯籠に描かれた子供たちの絵や、香ばしい屋台の匂い、そして勇壮な神楽の演舞。ほたるを守る監視員の活動など、お祭りを支える人々の姿も収めた大切な記録です。',
+    description: '灯籠に描かれた子供たちの絵や、香ばしい屋台の匂い、そして勇壮な神楽の演舞。ほたるを守る保護監視員の活動など、お祭りを支える人々の姿も収めた大切な記録です。',
     images: [
       { url: '/images/gallery/recent/photo-1.jpg', alt: '地域の子供たちが書いた灯籠', title: '子供たちの想いが灯る灯籠' },
-      { url: '/images/gallery/recent/photo-2.jpg', alt: 'ほたる保護監視員の活動', title: 'ほたるを守る、監視員の活動' },
+      { url: '/images/gallery/recent/photo-2.jpg', alt: 'ほたる保護監視員の活動', title: 'ほたるを守る、保護監視員の活動' },
       { url: '/images/gallery/recent/photo-3.jpg', alt: 'ほたる観賞会', title: 'ガイド付きほたる観賞会' },
       { url: '/images/gallery/recent/photo-4.jpg', alt: '地元のお店が出店してるほたる茶屋', title: '地元グルメが並ぶ「ほたる茶屋」' },
       { url: '/images/gallery/recent/photo-5.jpg', alt: 'ほたる茶屋の賑わい', title: '賑わう出店コーナー' },

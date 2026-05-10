@@ -346,7 +346,7 @@ export const faqData = [
   },
 ];
 
-// 監視員レポート（モック）
+// 保護監視員レポート（モック）
 export const reports = [
   {
     id: 'report-1',
