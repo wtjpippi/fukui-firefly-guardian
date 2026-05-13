@@ -18,7 +18,7 @@ export default function Events() {
     <div className="page events-page">
       <div className="container">
         <h1 className="section-title" style={{ paddingTop: 'var(--space-xl)' }}>
-          🎭 イベント情報
+          🏮 イベント情報
         </h1>
 
         <div className="hero-event-card glass-card" style={{ marginBottom: 'var(--space-2xl)' }}>

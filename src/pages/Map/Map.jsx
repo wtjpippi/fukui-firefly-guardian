@@ -136,7 +136,37 @@ function createLandmarkIcon(icon, label, currentZoom) {
   });
 }
 
-function createCourseLabelIcon(label, currentZoom) {
+function createBridgeLabelIcon(label, currentZoom) {
+  if (currentZoom < 17) {
+    return L.divIcon({ className: 'bridge-label-hidden', html: '' });
+  }
+
+  return L.divIcon({
+    className: 'custom-marker bridge-label-marker',
+    html: `
+      <div style="
+        background: rgba(0, 0, 0, 0.5);
+        backdrop-filter: blur(2px);
+        color: white;
+        font-size: 10px;
+        padding: 2px 8px;
+        border-radius: 4px;
+        white-space: nowrap;
+        font-weight: bold;
+        box-shadow: 0 2px 6px rgba(0,0,0,0.3);
+        border: 1px solid rgba(255, 255, 255, 0.1);
+        position: absolute;
+        top: 10px;
+        left: 50%;
+        transform: translateX(-50%);
+      ">${label}</div>
+    `,
+    iconSize: [80, 40],
+    iconAnchor: [40, 0],
+  });
+}
+
+function createCourseLabelIcon(label, currentZoom, rotation = 37) {
   if (currentZoom < 17) {
     return L.divIcon({ className: 'course-label-hidden', html: '' });
   }
@@ -158,7 +188,7 @@ function createCourseLabelIcon(label, currentZoom) {
       font-weight: 800;
       white-space: nowrap;
       letter-spacing: 0.5em;
-      transform: rotate(37deg);
+      transform: rotate(${rotation}deg);
       pointer-events: none;
       text-shadow: 0 0 3px rgba(0,0,0,0.5);
       text-align: center;
@@ -443,7 +473,12 @@ export default function MapPage() {
               </Popup>
             </Marker>
 
-            <Marker position={[37.761067, 138.832158]} icon={createLandmarkIcon('🌉', '蛍観橋', currentZoom)}>
+            <Marker 
+              key={`bridge-keikan-${currentZoom >= 17}`}
+              position={[37.761067, 138.832158]} 
+              icon={createBridgeLabelIcon('蛍観橋', currentZoom)} 
+              interactive={currentZoom >= 17}
+            >
               <Popup>
                 <div style={{ color: '#333' }}>
                   <strong style={{ fontSize: '14px' }}>蛍観橋（けいかんばし）</strong>
@@ -451,7 +486,12 @@ export default function MapPage() {
               </Popup>
             </Marker>
 
-            <Marker position={[37.757828, 138.834937]} icon={createLandmarkIcon('🌉', '源氏橋', currentZoom)}>
+            <Marker 
+              key={`bridge-genji-${currentZoom >= 17}`}
+              position={[37.757828, 138.834937]} 
+              icon={createBridgeLabelIcon('源氏橋', currentZoom)} 
+              interactive={currentZoom >= 17}
+            >
               <Popup>
                 <div style={{ color: '#333' }}>
                   <strong style={{ fontSize: '14px' }}>源氏橋（げんじばし）</strong>
@@ -459,7 +499,12 @@ export default function MapPage() {
               </Popup>
             </Marker>
 
-            <Marker position={[37.756798, 138.835194]} icon={createLandmarkIcon('🌉', 'イモ穴橋', currentZoom)}>
+            <Marker 
+              key={`bridge-imoana-${currentZoom >= 17}`}
+              position={[37.756798, 138.835194]} 
+              icon={createBridgeLabelIcon('イモ穴橋', currentZoom)} 
+              interactive={currentZoom >= 17}
+            >
               <Popup>
                 <div style={{ color: '#333' }}>
                   <strong style={{ fontSize: '14px' }}>イモ穴橋（いもあなばし）</strong>
@@ -467,7 +512,12 @@ export default function MapPage() {
               </Popup>
             </Marker>
 
-            <Marker position={[37.755700, 138.835757]} icon={createLandmarkIcon('🌉', '平家橋', currentZoom)}>
+            <Marker 
+              key={`bridge-heike-${currentZoom >= 17}`}
+              position={[37.755700, 138.835757]} 
+              icon={createBridgeLabelIcon('平家橋', currentZoom)} 
+              interactive={currentZoom >= 17}
+            >
               <Popup>
                 <div style={{ color: '#333' }}>
                   <strong style={{ fontSize: '14px' }}>平家橋（へいけばし）</strong>
@@ -475,10 +525,22 @@ export default function MapPage() {
               </Popup>
             </Marker>
 
-            {/* 堂ノ腰コースの透かしラベル (固定位置) */}
+            {/* 各コースの透かしラベル (固定位置) */}
             <Marker 
               position={[37.757003, 138.833327]} 
               icon={createCourseLabelIcon('堂ノ腰コース', currentZoom)}
+              interactive={false}
+            />
+
+            <Marker 
+              position={[37.759934, 138.832753]} 
+              icon={createCourseLabelIcon('蛍観橋コース', currentZoom, 65)}
+              interactive={false}
+            />
+
+            <Marker 
+              position={[37.756482, 138.835747]} 
+              icon={createCourseLabelIcon('源平橋コース', currentZoom, 75)}
               interactive={false}
             />
 
@@ -593,9 +655,6 @@ export default function MapPage() {
                 </div>
                 <div className="map-legend-item">
                   <span style={{ fontSize: '14px' }}>♨️</span> じょんのび館
-                </div>
-                <div className="map-legend-item">
-                  <span style={{ fontSize: '14px' }}>🌉</span> 主な橋
                 </div>
               </div>
             </div>

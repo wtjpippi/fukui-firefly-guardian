@@ -5,7 +5,7 @@ import './Navigation.css';
 const navIcons = {
   '/': '🏠',
   '/map': '🗺️',
-  '/events': '🎭',
+  '/events': '🏮',
   '/gallery': '📸',
   '/local-guide': '🏞️',
   '/reports': '📑',
