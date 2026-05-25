@@ -62,10 +62,7 @@ export default function LocalGuide() {
       title: '巻射撃場',
       icon: <Target size={20} />,
       description: '日本クレー射撃協会A級公認のトラップ射面2面とスキート射面2面を備える射撃場。日本一美しい射撃場造りを目指し、快適な射撃空間を提供しています。',
-    }
-  ];
-
-  const companies = [
+    },
     {
       id: 'shirame',
       title: '峰乃白梅酒造',
@@ -74,6 +71,7 @@ export default function LocalGuide() {
       link: 'https://minenohakubai.com/'
     }
   ];
+
 
   return (
     <div className="page local-guide-page">
@@ -172,35 +170,6 @@ export default function LocalGuide() {
             </div>
           </section>
 
-          {/* Local Companies */}
-          <section className="guide-section">
-            <h3 className="sub-title">🏢 地元企業</h3>
-            <div className="shops-grid">
-              {companies.map(company => (
-                <div key={company.id} className="guide-card glass-card">
-                  <div className="guide-card-header">
-                    <div className="guide-icon-box">{company.icon}</div>
-                    <h3>{company.title}</h3>
-                  </div>
-                  <p className="guide-text">{company.description}</p>
-                  {company.link && (
-                    <div className="card-links">
-                      <a href={company.link} target="_blank" rel="noopener noreferrer" className="card-link">
-                        <ExternalLink size={14} /> 公式サイト
-                      </a>
-                    </div>
-                  )}
-                </div>
-              ))}
-              <div className="guide-card placeholder-card glass-card">
-                 <div className="guide-card-header">
-                   <div className="guide-icon-box"><Building2 size={20} /></div>
-                   <h3>（企業枠募集中）</h3>
-                 </div>
-                 <p className="guide-text">福井地区を支える地元企業のご紹介を随時受け付けております。</p>
-              </div>
-            </div>
-          </section>
 
           {/* Sponsors Section */}
           <section className="guide-section">
