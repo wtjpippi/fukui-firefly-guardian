@@ -62,6 +62,7 @@ export default function LocalGuide() {
       title: '巻射撃場',
       icon: <Target size={20} />,
       description: '日本クレー射撃協会A級公認のトラップ射面2面とスキート射面2面を備える射撃場。日本一美しい射撃場造りを目指し、快適な射撃空間を提供しています。',
+      link: 'https://makishagekijou.opal.ne.jp/'
     },
     {
       id: 'shirame',
