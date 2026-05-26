@@ -1,25 +1,20 @@
 
-import { schedule, vendors } from '../../data/mockData';
+import { schedule } from '../../data/mockData';
 import { eventInfo } from '../../config/eventInfo';
-import { Calendar } from 'lucide-react';
+import { Calendar, ZoomIn, Download } from 'lucide-react';
+import { useState } from 'react';
+import Lightbox from 'yet-another-react-lightbox';
+import 'yet-another-react-lightbox/styles.css';
 import './Events.css';
 
-const vendorIcons = {
-  food: '🏮',
-  sweets: '🍡',
-  drink: '🍺',
-  sake: '🍶',
-  kids: '🎠',
-  sauna: '♨️',
-};
-
 export default function Events() {
+  const [lightboxOpen, setLightboxOpen] = useState(false);
+  const flyerUrl = '/images/flyer.png';
+
   return (
     <div className="page events-page">
       <div className="container">
-        <h1 className="section-title" style={{ paddingTop: 'var(--space-xl)' }}>
-          🏮 イベント情報
-        </h1>
+        <h1 className="section-title" style={{ paddingTop: 'var(--space-xl)' }}><span className="title-emoji">🏮</span>イベント情報</h1>
 
         <div className="hero-event-card glass-card" style={{ marginBottom: 'var(--space-2xl)' }}>
           <div className="hero-event-info-group">
@@ -29,6 +24,35 @@ export default function Events() {
               <Calendar size={14} />
               {eventInfo.festivalFullDate}
             </div>
+          </div>
+        </div>
+
+        {/* Poster (Flyer) */}
+        <h2 className="section-title">ほたる祭り パンフレット</h2>
+        <div className="flyer-container glass-card" style={{ marginBottom: 'var(--space-2xl)' }}>
+          <div className="flyer-wrapper" onClick={() => setLightboxOpen(true)}>
+            <img 
+              src={flyerUrl} 
+              alt="第32回 福井ほたる祭り チラシ" 
+              className="flyer-image"
+              onError={(e) => {
+                // 画像読み込みエラー時のフォールバック処理（プレースホルダー）
+                e.target.src = 'https://placehold.co/800x1130/1e293b/a3e635?text=%E3%83%81%E3%83%A9%E3%82%B7%E3%81%AF%E6%BA%96%E5%82%99%E4%B8%AD%E3%81%A7%E3%81%99';
+              }}
+            />
+            <div className="flyer-overlay">
+              <ZoomIn size={24} />
+              <span>タップして拡大表示</span>
+            </div>
+          </div>
+          <div className="flyer-actions">
+            <a href={flyerUrl} download="第32回福井ほたる祭りチラシ.png" className="btn btn-primary download-btn">
+              <Download size={16} />
+              チラシをダウンロードする
+            </a>
+            <p className="flyer-note">
+              ※出店情報（ほたる茶屋）や会場マップ、各種コーナーの詳細については上記チラシをご覧ください。
+            </p>
           </div>
         </div>
 
@@ -47,37 +71,18 @@ export default function Events() {
           ))}
         </div>
 
-        {/* Vendors */}
-        <h2 className="section-title" style={{ marginTop: 'var(--space-2xl)' }}>出店情報</h2>
-        <div className="vendor-grid">
-          {vendors.map(v => (
-            <div key={v.id} className="glass-card vendor-card">
-              <div className="vendor-icon">{vendorIcons[v.type] || '🏪'}</div>
-              <div className="vendor-info">
-                <div className="vendor-name">{v.name}</div>
-                <div className="vendor-location">{v.location}</div>
-                {v.description && (
-                  <div style={{ fontSize: 'var(--text-sm)', color: 'var(--color-text-secondary)', marginBottom: 'var(--space-sm)' }}>
-                    {v.description}
-                  </div>
-                )}
-                <div className="vendor-items">
-                  {v.items.map((item, i) => (
-                    item === 'BR' ? (
-                      <div key={i} style={{ flexBasis: '100%', height: 0, margin: 0 }}></div>
-                    ) : item === 'ほか' ? (
-                      <span key={i} style={{ fontSize: 'var(--text-xs)', color: 'var(--color-text-muted)', alignSelf: 'center', marginLeft: '2px' }}>ほか</span>
-                    ) : (
-                      <span key={i} className="vendor-item-tag">{item}</span>
-                    )
-                  ))}
-                </div>
-              </div>
-            </div>
-          ))}
-        </div>
-
       </div>
+
+      <Lightbox
+        open={lightboxOpen}
+        close={() => setLightboxOpen(false)}
+        slides={[{ src: flyerUrl, alt: '第32回 福井ほたる祭り チラシ' }]}
+        render={{
+          buttonPrev: () => null,
+          buttonNext: () => null,
+        }}
+        carousel={{ finite: true }}
+      />
     </div>
   );
 }

@@ -7,7 +7,7 @@ export default function Coupon() {
   return (
     <div className="page">
       <div className="container" style={{ paddingTop: 'var(--space-xl)', paddingBottom: 'var(--space-2xl)' }}>
-        <h1 className="section-title">🎁 来場特典</h1>
+        <h1 className="section-title"><span className="title-emoji">🎁</span>来場特典</h1>
 
         <div className="glass-card" style={{
           textAlign: 'center',

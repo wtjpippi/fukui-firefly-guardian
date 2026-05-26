@@ -111,6 +111,16 @@ ol {
   box-shadow: var(--shadow-glow);
 }
 
+.title-emoji {
+  display: inline-block;
+  vertical-align: middle;
+  margin-right: 0.3em;
+  line-height: 1;
+  font-family: "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol", "Noto Color Emoji", sans-serif;
+  position: relative;
+  top: -0.05em; /* 視覚的な微調整 */
+}
+
 /* Glass Card */
 .glass-card {
   background: var(--color-bg-card);

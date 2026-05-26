@@ -22,7 +22,7 @@ export default function Gallery() {
       <div className="container" style={{ paddingBottom: 'var(--space-3xl)' }}>
         
         <header className="gallery-hero">
-          <h1 className="section-title">📸 ほたる祭りの風景</h1>
+          <h1 className="section-title"><span className="title-emoji">📸</span>ほたる祭りの風景</h1>
           <p style={{ fontSize: 'var(--text-base)', color: 'var(--color-text-secondary)', maxWidth: '600px', margin: '0 auto' }}>
             30年以上にわたり受け継がれてきた福井の初夏の風物詩。<br />
             地域に愛され続けるお祭りの魅力と歩みを、写真で振り返ります。

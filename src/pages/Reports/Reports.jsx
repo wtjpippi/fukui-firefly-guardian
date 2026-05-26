@@ -82,7 +82,7 @@ export default function Reports() {
   return (
     <div className="page">
       <div className="container" style={{ paddingTop: 'var(--space-xl)', paddingBottom: 'var(--space-2xl)' }}>
-        <h1 className="section-title">📣 活動レポート</h1>
+        <h1 className="section-title"><span className="title-emoji">📣</span>活動レポート</h1>
 
         {/* 年度セレクター */}
         {availableYears.length > 1 && (

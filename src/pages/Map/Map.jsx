@@ -1,6 +1,8 @@
 import React, { useState, useRef, useEffect, useCallback } from 'react';
-import { MapContainer, TileLayer, Marker, Popup, LayersControl, useMapEvents } from 'react-leaflet';
+import { MapContainer, TileLayer, Marker, Popup, LayersControl, useMapEvents, Polyline } from 'react-leaflet';
 import L from 'leaflet';
+import Lightbox from 'yet-another-react-lightbox';
+import 'yet-another-react-lightbox/styles.css';
 import { MapPin, Navigation } from 'lucide-react';
 import { supabase } from '../../lib/supabaseClient';
 import { formatStatusTime, getLatestUpdate, getFormattedToday } from '../../utils/dateUtils';
@@ -172,7 +174,14 @@ function createCourseLabelIcon(label, currentZoom, rotation = 37) {
   }
 
   const opacity = 0.6;
-  const fontSize = '18px';
+  
+  // ズームレベルに応じてフォントサイズとアイコン領域サイズをスケールさせる
+  const baseFontSize = 16;
+  const scale = Math.pow(1.5, currentZoom - 17);
+  const fontSize = `${Math.round(baseFontSize * scale)}px`;
+  
+  const width = Math.round(250 * scale);
+  const height = Math.round(40 * scale);
   
   return L.divIcon({
     className: 'course-label-marker',
@@ -193,8 +202,8 @@ function createCourseLabelIcon(label, currentZoom, rotation = 37) {
       text-shadow: 0 0 3px rgba(0,0,0,0.5);
       text-align: center;
     ">${label}</div>`,
-    iconSize: [250, 40],
-    iconAnchor: [125, 20],
+    iconSize: [width, height],
+    iconAnchor: [Math.round(width / 2), Math.round(height / 2)],
   });
 }
 
@@ -225,10 +234,55 @@ function LocationPicker() {
   return null;
 }
 
+// 各コースの散策ルート座標配列（既存のピンを結ぶ）
+const courses = [
+  {
+    id: 'donokoshi',
+    name: '堂ノ腰コース',
+    path: [
+      [37.758621, 138.831192], // お祭り会場
+      [37.757659, 138.832313], // 堂ノ腰コース　林道入口
+      [37.756602, 138.833343], // 堂ノ腰コース　林道中間
+      [37.756259, 138.834314], // 堂ノ腰コース　林道出口
+    ]
+  },
+  {
+    id: 'yuhodo',
+    name: 'ほたる遊歩道',
+    path: [
+      [37.758621, 138.831192], // お祭り会場
+      [37.757668, 138.831283], // ほたる遊歩道
+    ]
+  },
+  {
+    id: 'genpei',
+    name: '源平橋コース',
+    path: [
+      [37.758099, 138.834803], // 源平橋コース　源氏橋上
+      [37.757093, 138.835060], // 源平橋コース　イモ穴橋上
+      [37.756494, 138.835350], // 源平橋コース　イモ穴橋下
+      [37.755407, 138.835881], // 源平橋コース　平家橋下
+    ]
+  },
+  {
+    id: 'keikan',
+    name: '蛍観橋コース',
+    path: [
+      [37.758811, 138.833730], // 駐車場 P4
+      [37.760707, 138.832346], // 蛍観橋コース　蛍観橋付近
+    ]
+  }
+];
+
+
+
 // ほたるマップページ
 export default function MapPage() {
   const [map, setMap] = useState(null);
   const [fireflyPoints, setFireflyPoints] = useState([]);
+  const [imageErrors, setImageErrors] = useState({});
+  const [lightboxIndex, setLightboxIndex] = useState(-1);
+  const [lightboxImages, setLightboxImages] = useState([]);
   const [parkingLots, setParkingLots] = useState([]);
   const [userPosition, setUserPosition] = useState(null);
   const [isLocating, setIsLocating] = useState(false);
@@ -391,12 +445,46 @@ export default function MapPage() {
   const latestUpdate = getLatestUpdate(fireflyPoints.map(p => ({ ...p, lastUpdated: p.updated_at })));
   const todayLabel = getFormattedToday();
 
+  const openCourseLightbox = (imageUrl, title) => {
+    setLightboxImages([{ src: imageUrl, alt: title, title }]);
+    setLightboxIndex(0);
+  };
+
+  // 各コースの紹介文と画像
+  const courseDetails = {
+    '蛍観橋コース': {
+      image: '/images/courses/keikan.jpg',
+      description: '蛍観橋の周辺で、美しいほたるの光を楽しめる散策コースです。',
+    },
+    'ほたる遊歩道': {
+      image: '/images/courses/yuhodo.jpg',
+      description: 'お祭り会場から近く、気軽にほたるの光を楽しめる散策ルートです。',
+    },
+    '堂ノ腰コース': {
+      image: '/images/courses/donokoshi.jpg',
+      description: '林道に沿って広範囲で飛翔が確認できる、人気の散策コースです。',
+    },
+    '源平橋コース': {
+      image: '/images/courses/genpei.jpg',
+      description: '源氏橋・イモ穴橋・平家橋周辺の川沿いで、幻想的な乱舞が楽しめます。',
+    }
+  };
+
+  // 4つの分類（コース名）でポイントをグルーピング
+  const courseOrder = ['蛍観橋コース', 'ほたる遊歩道', '堂ノ腰コース', '源平橋コース'];
+  const groupedPoints = courseOrder.map(courseName => {
+    const points = fireflyPoints.filter(p => p.course === courseName);
+    return {
+      courseName,
+      details: courseDetails[courseName] || { image: '', description: '' },
+      points
+    };
+  }).filter(g => g.points.length > 0);
+
   return (
     <div className="page map-page">
       <div className="container">
-        <h1 className="section-title" style={{ paddingTop: 'var(--space-xl)' }}>
-          🗺️ ほたるマップ
-        </h1>
+        <h1 className="section-title" style={{ paddingTop: 'var(--space-xl)' }}><span className="title-emoji">🗺️</span>ほたるマップ</h1>
 
         <div className="map-info-guide">
           <div className="guide-item">
@@ -525,22 +613,40 @@ export default function MapPage() {
               </Popup>
             </Marker>
 
+            {/* 各コースの動的な点線ルート */}
+            {courses.map(course => {
+              if (currentZoom < 17) return null;
+              
+              return (
+                <Polyline
+                  key={course.id}
+                  positions={course.path}
+                  pathOptions={{
+                    color: 'var(--color-firefly)',
+                    weight: 3,
+                    opacity: 0.5,
+                    dashArray: '6, 10'
+                  }}
+                />
+              );
+            })}
+
             {/* 各コースの透かしラベル (固定位置) */}
             <Marker 
-              position={[37.757003, 138.833327]} 
-              icon={createCourseLabelIcon('堂ノ腰コース', currentZoom)}
+              position={[37.757159, 138.833537]}  
+              icon={createCourseLabelIcon('堂ノ腰コース', currentZoom, 42)}
               interactive={false}
             />
 
             <Marker 
-              position={[37.759934, 138.832753]} 
-              icon={createCourseLabelIcon('蛍観橋コース', currentZoom, 65)}
+              position={[37.759949, 138.833455]} 
+              icon={createCourseLabelIcon('蛍観橋コース', currentZoom, 60)}
               interactive={false}
             />
 
             <Marker 
-              position={[37.756482, 138.835747]} 
-              icon={createCourseLabelIcon('源平橋コース', currentZoom, 75)}
+              position={[37.756854, 138.835650]} 
+              icon={createCourseLabelIcon('源平橋コース', currentZoom, 72)}
               interactive={false}
             />
 
@@ -693,40 +799,66 @@ export default function MapPage() {
           </div>
         </div>
 
-        <h2 className="map-section-title">✨ 飛翔ポイント</h2>
-        {fireflyPoints.map(point => (
-          <div key={point.id} className="glass-card point-card">
-            <div className="point-info">
-              <div className="point-name">
-                {point.name.includes('　') ? (
-                  <>
-                    <span className="point-name-course">{point.name.split('　')[0]}</span>
-                    <span className="point-name-sep"> </span>
-                    <span className="point-name-spot">{point.name.split('　')[1]}</span>
-                  </>
-                ) : (
-                  point.name
-                )}
+        <h2 className="map-section-title">✨ 飛翔ポイント・散策コース</h2>
+        <div className="course-grid">
+          {groupedPoints.map(group => {
+            const hasImage = !!group.details.image && !imageErrors[group.courseName];
+            return (
+              <div key={group.courseName} className="glass-card course-group-card">
+                <div className="course-card-image-wrapper">
+                  {hasImage ? (
+                    <img 
+                      src={group.details.image} 
+                      alt={group.courseName} 
+                      className="course-card-image" 
+                      style={{ cursor: 'pointer' }}
+                      onClick={() => openCourseLightbox(group.details.image, group.courseName)}
+                      onError={() => setImageErrors(prev => ({ ...prev, [group.courseName]: true }))}
+                    />
+                  ) : (
+                    <div className="course-card-no-image">
+                      <span>📷 No Image</span>
+                    </div>
+                  )}
+                </div>
+                <div className="course-card-content">
+                  <div className="course-card-header-title">
+                    <h3 style={{ margin: 0, fontSize: 'var(--text-base)', fontWeight: '700' }}>{group.courseName}</h3>
+                    <p className="course-card-desc" style={{ marginTop: '4px', marginBottom: 'var(--space-md)' }}>
+                      {group.details.description}
+                    </p>
+                  </div>
+                  
+                  <div className="course-points-list">
+                    {group.points.slice().reverse().map(point => (
+                      <div key={point.id} className="course-point-item">
+                        <div className="point-item-info">
+                          <span className="point-item-name">
+                            {point.name.includes('　') ? point.name.split('　')[1] : point.name}
+                          </span>
+                          <span className={`badge ${statusLabels[point.status]?.badge}`} style={{ padding: '2px 10px', fontSize: '11px' }}>
+                            {statusLabels[point.status]?.label}
+                          </span>
+                        </div>
+                        <div className="point-item-actions">
+                          <span className="point-item-updated">{formatStatusTime(point.updated_at)}</span>
+                          <button
+                            className="jump-button-mini"
+                            onClick={() => handleJumpToLocation(point.id, point.lat, point.lng)}
+                            title="地図で見る"
+                          >
+                            <MapPin size={12} />
+                            <span>地図</span>
+                          </button>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                </div>
               </div>
-            </div>
-            <div className="card-buttons">
-              <button
-                className="jump-button"
-                onClick={() => handleJumpToLocation(point.id, point.lat, point.lng)}
-                title="地図で見る"
-              >
-                <MapPin size={14} />
-                <span>地図<span className="hide-mobile">で見る</span></span>
-              </button>
-            </div>
-            <div className="point-status">
-              <span className={`badge ${statusLabels[point.status]?.badge}`}>
-                {statusLabels[point.status]?.label}
-              </span>
-              <span className="point-updated">{formatStatusTime(point.updated_at)}</span>
-            </div>
-          </div>
-        ))}
+            );
+          })}
+        </div>
 
         <h2 className="map-section-title">🅿️ 駐車場（P1〜P8）</h2>
         <p className="map-section-note">
@@ -763,6 +895,13 @@ export default function MapPage() {
           </div>
         ))}
       </div>
+      
+      <Lightbox
+        index={lightboxIndex}
+        open={lightboxIndex >= 0}
+        close={() => setLightboxIndex(-1)}
+        slides={lightboxImages}
+      />
     </div>
   );
 }

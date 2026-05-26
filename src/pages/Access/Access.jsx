@@ -6,7 +6,7 @@ export default function Access() {
   return (
     <div className="page">
       <div className="container" style={{ paddingTop: 'var(--space-xl)', paddingBottom: 'var(--space-2xl)' }}>
-        <h1 className="section-title">🚗 {eventInfo.festivalName} 当日のアクセス</h1>
+        <h1 className="section-title"><span className="title-emoji">🚗</span>{eventInfo.festivalName} 当日のアクセス</h1>
 
         {/* Google Maps embed */}
         <div style={{

@@ -50,7 +50,7 @@ export default function Faq() {
   return (
     <div className="page">
       <div className="container" style={{ paddingTop: 'var(--space-xl)', paddingBottom: 'var(--space-2xl)' }}>
-        <h1 className="section-title">❓ よくある質問</h1>
+        <h1 className="section-title"><span className="title-emoji">❓</span>よくある質問</h1>
 
         {faqData.map((category) => (
           <div key={category.category} style={{ marginBottom: 'var(--space-xl)' }}>

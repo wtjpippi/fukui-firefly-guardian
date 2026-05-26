@@ -1,5 +1,5 @@
 import './LocalGuide.css';
-import { Map, Store, Trees, Camera, Coffee, Instagram, ExternalLink, Building2, Utensils, Waves, Target, Landmark, HelpCircle } from 'lucide-react';
+import { Map, Store, Trees, Camera, Coffee, Instagram, ExternalLink, Building2, Wheat, Bath, Target, Landmark, HelpCircle } from 'lucide-react';
 
 export default function LocalGuide() {
   const shops = [
@@ -9,7 +9,6 @@ export default function LocalGuide() {
       icon: <Store size={20} />,
       description: '1817年（文化14年）創業、良寛（りょうかん）さまが名付け親と伝えられる歴史ある菓子店。「福ほたる饅頭」は、ほたる観賞のお土産として長く愛されています。',
       tags: ['1817年創業', '福ほたる饅頭'],
-      link: 'http://www.niigata-ameya.com/'
     },
     {
       id: 'honmaya',
@@ -53,7 +52,7 @@ export default function LocalGuide() {
     {
       id: 'jonnobi',
       title: 'サウナと天然温泉 じょんのび館',
-      icon: <Waves size={20} />,
+      icon: <Bath size={20} />,
       description: '『温まりの湯』『美肌の湯』を楽しめる天然温泉。趣の異なる二つの湯殿でゆったりと湯に浸かり、心ゆくまで「じょんのび」したひとときを過ごせます。',
       link: 'https://www.jonnobi.com/'
     },
@@ -67,7 +66,7 @@ export default function LocalGuide() {
     {
       id: 'shirame',
       title: '峰乃白梅酒造',
-      icon: <Utensils size={20} />,
+      icon: <Wheat size={20} />,
       description: '角田山の麓で約400年の歴史を持つ蔵元。「越後の三梅」の一つとして知られ、現在は芳醇旨口を軸とした新しい日本酒造りに挑戦し続けています。',
       link: 'https://minenohakubai.com/'
     }
@@ -77,7 +76,7 @@ export default function LocalGuide() {
   return (
     <div className="page local-guide-page">
       <div className="container" style={{ paddingTop: 'var(--space-2xl)', paddingBottom: 'var(--space-3xl)' }}>
-        <h1 className="section-title">🏞️ 地域紹介</h1>
+        <h1 className="section-title"><span className="title-emoji">🏞️</span>地域紹介</h1>
         <p className="guide-intro">
           新潟市西蒲区福井地区。ここは、ほたるが舞う清流と、古き良き日本の営みが息づく場所です。<br />
           周辺の魅力的な施設や史跡をご紹介します。
@@ -150,7 +149,7 @@ export default function LocalGuide() {
 
           {/* Facilities Section */}
           <section className="guide-section">
-            <h3 className="sub-title">♨️ 周辺施設</h3>
+            <h3 className="sub-title">🏢 周辺施設</h3>
             <div className="shops-grid"> {/* 使い回して横並びに */}
               {facilities.map(facility => (
                 <div key={facility.id} className="guide-card glass-card">

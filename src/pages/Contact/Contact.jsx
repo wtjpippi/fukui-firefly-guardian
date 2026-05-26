@@ -1,39 +1,16 @@
-import { Phone, Mail, ExternalLink } from 'lucide-react';
+import { Phone, ExternalLink } from 'lucide-react';
 
 export default function Contact() {
   return (
     <div className="page">
       <div className="container" style={{ paddingTop: 'var(--space-xl)', paddingBottom: 'var(--space-2xl)' }}>
-        <h1 className="section-title">📞 お問い合わせ</h1>
-
-        <div className="glass-card" style={{ padding: 'var(--space-xl)', textAlign: 'center', marginBottom: 'var(--space-md)' }}>
-          <div style={{ fontSize: '2.5rem', marginBottom: 'var(--space-md)' }}>📱</div>
-          <h3 style={{ marginBottom: 'var(--space-sm)' }}>お電話でのお問い合わせ</h3>
-          <a
-            href="tel:XXX-XXXX-XXXX"
-            style={{
-              display: 'inline-flex',
-              alignItems: 'center',
-              gap: 'var(--space-sm)',
-              fontSize: 'var(--text-xl)',
-              fontWeight: '700',
-              color: 'var(--color-firefly)',
-              marginBottom: 'var(--space-sm)',
-            }}
-          >
-            <Phone size={20} />
-            XXX-XXXX-XXXX
-          </a>
-          <p style={{ fontSize: 'var(--text-xs)', color: 'var(--color-text-muted)' }}>
-            福井ほたる保護監視員 事務局
-          </p>
-        </div>
+        <h1 className="section-title"><span className="title-emoji">📞</span>お問い合わせ</h1>
 
         <div className="glass-card" style={{ padding: 'var(--space-xl)', textAlign: 'center', marginBottom: 'var(--space-md)' }}>
           <div style={{ fontSize: '2.5rem', marginBottom: 'var(--space-md)' }}>🏛️</div>
           <h3 style={{ marginBottom: 'var(--space-sm)' }}>福井集落開発センター</h3>
           <a
-            href="tel:XXXX-XX-XXXX"
+            href="tel:0256-72-7587"
             style={{
               display: 'inline-flex',
               alignItems: 'center',
@@ -45,7 +22,7 @@ export default function Contact() {
             }}
           >
             <Phone size={20} />
-            XXXX-XX-XXXX
+            0256-72-7587
           </a>
           <p style={{ fontSize: 'var(--text-xs)', color: 'var(--color-text-muted)' }}>
             福井自治会
@@ -54,7 +31,10 @@ export default function Contact() {
 
         <div className="glass-card" style={{ padding: 'var(--space-xl)', textAlign: 'center' }}>
           <div style={{ fontSize: '2.5rem', marginBottom: 'var(--space-md)' }}>💬</div>
-          <h3 style={{ marginBottom: 'var(--space-md)' }}>フォームでのお問い合わせ</h3>
+          <h3 style={{ marginBottom: 'var(--space-sm)' }}>フォームでのお問い合わせ</h3>
+          <p style={{ fontSize: 'var(--text-xs)', color: 'var(--color-text-muted)', marginBottom: 'var(--space-md)' }}>
+            福井ほたる保護監視員 事務局
+          </p>
           <p style={{
             fontSize: 'var(--text-sm)',
             color: 'var(--color-text-secondary)',
