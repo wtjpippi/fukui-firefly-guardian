@@ -1,11 +1,12 @@
 import { useState, useEffect } from 'react';
-import { Link } from 'react-router-dom';
+import { Link, useLocation } from 'react-router-dom';
 import { Share2, Twitter, Facebook, MessageCircle, Instagram, Copy, Check, QrCode, X } from 'lucide-react';
 import './Footer.css';
 
 export default function Footer() {
   const [copied, setCopied] = useState(false);
   const [showQr, setShowQr] = useState(false);
+  const location = useLocation();
   const siteUrl = window.location.origin;
   const siteTitle = "福井ほたる祭り | 新潟市西蒲区";
 
@@ -27,6 +28,12 @@ export default function Footer() {
   };
 
   const qrImageUrl = `https://api.qrserver.com/v1/create-qr-code/?size=240x240&data=${encodeURIComponent(siteUrl)}`;
+
+  const handleLinkClick = (path) => {
+    if (location.pathname === path) {
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    }
+  };
 
   return (
     <footer className="footer">
@@ -71,26 +78,27 @@ export default function Footer() {
           <div className="footer-link-group">
             <h4>メニュー</h4>
             <ul>
-              <li><Link to="/">ホーム</Link></li>
-              <li><Link to="/map">ほたるマップ</Link></li>
-              <li><Link to="/events">イベント情報</Link></li>
-              <li><Link to="/gallery">ギャラリー</Link></li>
-              <li><Link to="/local-guide">地域紹介</Link></li>
+              <li><Link to="/" onClick={() => handleLinkClick('/')}>ホーム</Link></li>
+              <li><Link to="/map" onClick={() => handleLinkClick('/map')}>ほたるマップ</Link></li>
+              <li><Link to="/events" onClick={() => handleLinkClick('/events')}>イベント情報</Link></li>
+              <li><Link to="/reports" onClick={() => handleLinkClick('/reports')}>活動レポート</Link></li>
+              <li><Link to="/gallery" onClick={() => handleLinkClick('/gallery')}>ギャラリー</Link></li>
+              <li><Link to="/local-guide" onClick={() => handleLinkClick('/local-guide')}>地域紹介</Link></li>
             </ul>
           </div>
           <div className="footer-link-group">
             <h4>お役立ち</h4>
             <ul>
               <li><Link to="/#manners">ほたる観賞マナー</Link></li>
-              <li><Link to="/faq">FAQ / よくある質問</Link></li>
-              <li><Link to="/access">アクセス</Link></li>
-              <li><Link to="/coupon">来場特典</Link></li>
-              <li><Link to="/contact">お問い合わせ</Link></li>
+              <li><Link to="/faq" onClick={() => handleLinkClick('/faq')}>FAQ / よくある質問</Link></li>
+              <li><Link to="/access" onClick={() => handleLinkClick('/access')}>アクセス</Link></li>
+              <li><Link to="/coupon" onClick={() => handleLinkClick('/coupon')}>来場特典</Link></li>
+              <li><Link to="/contact" onClick={() => handleLinkClick('/contact')}>お問い合わせ</Link></li>
             </ul>
           </div>
           <div className="footer-link-group">
-            <h4 className="footer-sub-title">運営</h4>
-            <ul className="footer-links">
+            <h4 className="footer-sub-title">サイト運営</h4>
+            <ul className="footer-info">
               <li className="footer-info-item">福井ほたる保護監視員 事務局</li>
               <li className="footer-info-item">(福井自治会内)</li>
               <li className="footer-info-item">新潟市西蒲区福井</li>
@@ -98,7 +106,34 @@ export default function Footer() {
           </div>
         </div>
       </div>
-      
+
+      <div className="container">
+        <div className="footer-divider-line"></div>
+      </div>
+
+      <div className="container footer-festival-info">
+        <div className="festival-info-grid">
+          <div className="festival-info-block organizers">
+            <h4>主催・協力</h4>
+            <div className="info-row"><strong>主催：</strong>福井観光協会</div>
+            <div className="info-row"><strong>共催：</strong>巻観光協会 ・ 福井自治会</div>
+            <div className="info-row"><strong>後援：</strong>新潟市（新潟市補助事業）</div>
+            <div className="info-row"><strong>協力：</strong>福井地区関係団体</div>
+          </div>
+          <div className="festival-info-block sponsors">
+            <h4>協賛</h4>
+            <p className="sponsor-text">福井開発、峰乃白梅酒造、新潟県猟友会、巻射撃場</p>
+          </div>
+          <div className="festival-info-block contact">
+            <h4>お問い合わせ</h4>
+            <div className="contact-phone-box">
+              <span className="phone-number">📞 0256-72-7587</span>
+              <span className="phone-desc">（福井集落開発センター）</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
       <div className="footer-bottom">
         <div className="footer-bottom-copy">
           &copy; {new Date().getFullYear()} 福井ほたる保護監視員. All Rights Reserved.

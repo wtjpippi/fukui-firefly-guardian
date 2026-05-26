@@ -901,6 +901,12 @@ export default function MapPage() {
         open={lightboxIndex >= 0}
         close={() => setLightboxIndex(-1)}
         slides={lightboxImages}
+        carousel={{ finite: lightboxImages.length <= 1 }}
+        controller={{ disableSwipeNavigation: lightboxImages.length <= 1 }}
+        render={lightboxImages.length <= 1 ? {
+          buttonPrev: () => null,
+          buttonNext: () => null,
+        } : undefined}
       />
     </div>
   );
