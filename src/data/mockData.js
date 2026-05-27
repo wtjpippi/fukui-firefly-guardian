@@ -239,12 +239,12 @@ export const schedule = [
     description: 'ほたる茶屋・各出店がオープン',
     icon: '🏮',
   },
-  {
-    time: '17:00',
-    title: 'じょんのび館',
-    description: '会場にて特設テントサウナ体験を実施！',
-    icon: '♨️',
-  },
+  // {
+  //   time: '17:00',
+  //   title: 'じょんのび館',
+  //   description: '会場にて特設テントサウナ体験を実施！',
+  //   icon: '♨️',
+  // },
   {
     time: '18:30',
     title: '神楽舞の演舞',

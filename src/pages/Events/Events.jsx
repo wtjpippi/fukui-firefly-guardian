@@ -33,7 +33,7 @@ export default function Events() {
           <div className="flyer-wrapper" onClick={() => setLightboxOpen(true)}>
             <img 
               src={flyerUrl} 
-              alt="第32回 福井ほたる祭り チラシ" 
+              alt="第32回 福井ほたる祭り パンフレット" 
               className="flyer-image"
               onError={(e) => {
                 // 画像読み込みエラー時のフォールバック処理（プレースホルダー）
@@ -46,12 +46,12 @@ export default function Events() {
             </div>
           </div>
           <div className="flyer-actions">
-            <a href={flyerUrl} download="第32回福井ほたる祭りチラシ.png" className="btn btn-primary download-btn">
+            <a href={flyerUrl} download="第32回福井ほたる祭りパンフレット.png" className="btn btn-primary download-btn">
               <Download size={16} />
-              チラシをダウンロードする
+              パンフレットをダウンロードする
             </a>
             <p className="flyer-note">
-              ※出店情報（ほたる茶屋）や会場マップ、各種コーナーの詳細については上記チラシをご覧ください。
+              ※出店情報（ほたる茶屋）や会場マップ、各種コーナーの詳細については上記パンフレットをご覧ください。
             </p>
           </div>
         </div>
@@ -76,7 +76,7 @@ export default function Events() {
       <Lightbox
         open={lightboxOpen}
         close={() => setLightboxOpen(false)}
-        slides={[{ src: flyerUrl, alt: '第32回 福井ほたる祭り チラシ' }]}
+        slides={[{ src: flyerUrl, alt: '第32回 福井ほたる祭り パンフレット' }]}
         render={{
           buttonPrev: () => null,
           buttonNext: () => null,
