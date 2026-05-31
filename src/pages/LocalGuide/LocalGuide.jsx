@@ -50,18 +50,24 @@ export default function LocalGuide() {
 
   const facilities = [
     {
-      id: 'jonnobi',
-      title: 'サウナと天然温泉 じょんのび館',
-      icon: <Bath size={20} />,
-      description: '『温まりの湯』『美肌の湯』を楽しめる天然温泉。趣の異なる二つの湯殿でゆったりと湯に浸かり、心ゆくまで「じょんのび」したひとときを過ごせます。',
-      link: 'https://www.jonnobi.com/'
-    },
-    {
       id: 'shooting',
       title: '巻射撃場',
       icon: <Target size={20} />,
       description: '日本クレー射撃協会A級公認のトラップ射面2面とスキート射面2面を備える射撃場。日本一美しい射撃場造りを目指し、快適な射撃空間を提供しています。',
       link: 'https://makishagekijou.opal.ne.jp/'
+    },
+    {
+      id: 'ryoyukai-rifle',
+      title: '新潟県猟友会ライフル射撃場',
+      icon: <Target size={20} />,
+      description: '福井地区に新設された大口径ライフル対応の射撃場。新潟県猟友会により整備・運営され、狩猟者の射撃技術向上や教習・安全対策の訓練拠点となっています。',
+    },
+    {
+      id: 'jonnobi',
+      title: 'サウナと天然温泉 じょんのび館',
+      icon: <Bath size={20} />,
+      description: '『温まりの湯』『美肌の湯』を楽しめる天然温泉。趣の異なる二つの湯殿でゆったりと湯に浸かり、心ゆくまで「じょんのび」したひとときを過ごせます。',
+      link: 'https://www.jonnobi.com/'
     },
     {
       id: 'shirame',
