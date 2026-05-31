@@ -342,11 +342,33 @@
 .hero-cta .btn-glow {
   padding: var(--space-md) var(--space-xl);
   font-size: var(--text-base);
+  white-space: nowrap;
 }
 
 .hero-secondary-link {
   font-size: var(--text-sm);
   color: var(--color-text-secondary);
+  text-decoration: none;
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-xs);
+  transition: all var(--transition-fast);
+  padding: 2px 0;
+  border-bottom: 1px dashed rgba(255, 255, 255, 0.3);
+  white-space: nowrap;
+}
+
+.hero-secondary-link .arrow-icon {
+  transition: transform var(--transition-fast);
+}
+
+.hero-secondary-link:hover {
+  color: var(--color-firefly);
+  border-bottom: 1px solid var(--color-firefly);
+}
+
+.hero-secondary-link:hover .arrow-icon {
+  transform: translateX(4px);
 }
 
 .quick-links {
@@ -577,6 +599,7 @@
   .hero-event-title {
     font-size: 1.8rem;
     margin: 0;
+    white-space: nowrap;
   }
 
   .hero-event-date {
@@ -587,6 +610,7 @@
     flex-direction: row;
     align-items: center;
     gap: var(--space-xl);
+    flex-shrink: 0;
   }
 }
 

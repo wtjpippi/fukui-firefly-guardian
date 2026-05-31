@@ -97,7 +97,8 @@ export default function Home() {
               <ArrowRight size={16} />
             </Link>
             <Link to="/events" className="hero-secondary-link">
-              当日のスケジュールはこちら →
+              <span>当日のスケジュールはこちら</span>
+              <ArrowRight size={14} className="arrow-icon" />
             </Link>
           </div>
         </div>
