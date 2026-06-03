@@ -103,5 +103,29 @@ INSERT INTO parking_lots (id, name, lat, lng, capacity, walk_time, status, hint,
 INSERT INTO activity_reports (title, date, author, content, category) VALUES
   ('今年のほたる初確認！', '2025-06-05', '田中', '今年も矢垂川上流でゲンジボタルの初飛翔を確認しました。例年より少し早めの確認です。これから数が増えていくと思います。', '観測'),
   ('会場設営が始まりました', '2025-06-10', '佐藤', '6月21日の本祭に向けて、会場の設営作業を開始しました。テント設営、観賞コースの整備を行っています。', '準備'),
-  ('飛翔数が増えてきました', '2025-06-15', '田中', '蛍観橋コース付近で約50匹のゲンジボタルを確認。堂ノ腰コースでも20匹ほど確認できました。見頃は6月下旬になりそうです。', '観測'),
+  ('飛翔数が増えてきました', '2025-06-15', '田中', '飛翔数が増えてきました。蛍観橋コース付近で約50匹のゲンジボタルを確認。堂ノ腰コースでも20匹ほど確認できました。見頃は6月下旬になりそうです。', '観測'),
   ('観賞マナーのお願い', '2025-06-18', '鈴木', 'ほたる観賞時は強い光を避け、静かに観賞していただくようお願いいたします。ほたるの生態を守るために皆様のご協力をお願いします。', 'お知らせ');
+
+-- ============================================
+-- ⑤ 散策コースルートテーブル (GPSレコーダー用)
+-- ============================================
+CREATE TABLE course_routes (
+  id TEXT PRIMARY KEY,
+  name TEXT NOT NULL,
+  path JSONB,              -- 本番用ルートデータ: [{lat, lng, type}, ...]
+  draft_path JSONB,        -- 下書き用ルートデータ
+  updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+  updated_by TEXT
+);
+
+ALTER TABLE course_routes ENABLE ROW LEVEL SECURITY;
+CREATE POLICY "誰でも読み取り可" ON course_routes FOR SELECT USING (true);
+CREATE POLICY "管理用書き込み" ON course_routes FOR ALL USING (true) WITH CHECK (true);
+
+-- 既存4コースの初期データの登録（ルートは最初はNULLで登録され、デフォルトの線が使われます）
+INSERT INTO course_routes (id, name, path, draft_path) VALUES
+  ('donokoshi', '堂ノ腰コース', NULL, NULL),
+  ('yuhodo', 'ほたる遊歩道', NULL, NULL),
+  ('genpei', '源平橋コース', NULL, NULL),
+  ('kanhotaru', '蛍観橋コース', NULL, NULL)
+ON CONFLICT (id) DO NOTHING;

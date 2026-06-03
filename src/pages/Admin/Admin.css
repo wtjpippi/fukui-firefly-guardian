@@ -515,3 +515,188 @@
   color: #666;
 }
 
+/* ============================================
+   GPSルートレコーダー用スタイル
+   ============================================ */
+
+/* GPSステータスパネル */
+.gps-status-panel {
+  background: rgba(0, 0, 0, 0.2);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
+  padding: var(--space-sm) var(--space-md);
+  margin-bottom: var(--space-md);
+  font-size: var(--text-xs);
+}
+
+.gps-status-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  font-weight: 700;
+}
+
+.status-active {
+  color: #ef4444;
+  animation: pulse-red 1.5s infinite;
+}
+
+.status-inactive {
+  color: var(--color-text-muted);
+}
+
+@keyframes pulse-red {
+  0% { opacity: 0.6; }
+  50% { opacity: 1; }
+  100% { opacity: 0.6; }
+}
+
+/* スマホ用巨大コントロールボタン */
+.recorder-controls {
+  display: flex;
+  gap: var(--space-sm);
+  margin-bottom: var(--space-lg);
+}
+
+.recorder-btn {
+  flex: 1;
+  padding: var(--space-md) var(--space-sm);
+  border: none;
+  border-radius: var(--radius-md);
+  font-size: var(--text-sm);
+  font-weight: 700;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+  transition: all 0.2s ease;
+}
+
+.recorder-btn:active {
+  transform: scale(0.97);
+}
+
+.recorder-btn.start {
+  background: #ef4444;
+  color: #fff;
+}
+
+.recorder-btn.start:hover {
+  background: #dc2626;
+}
+
+.recorder-btn.stop {
+  background: #f59e0b;
+  color: #fff;
+  animation: recording-glow 2s infinite;
+}
+
+@keyframes recording-glow {
+  0% { box-shadow: 0 0 0 0 rgba(245, 158, 11, 0.4); }
+  70% { box-shadow: 0 0 0 8px rgba(245, 158, 11, 0); }
+  100% { box-shadow: 0 0 0 0 rgba(245, 158, 11, 0); }
+}
+
+.recorder-btn.reset {
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid var(--color-border);
+  color: var(--color-text-primary);
+}
+
+.recorder-btn.reset:disabled {
+  opacity: 0.3;
+  cursor: not-allowed;
+}
+
+/* 地面タイプ切り替え */
+.type-selector-container {
+  background: rgba(200, 230, 78, 0.03);
+  border: 1px dashed rgba(200, 230, 78, 0.2);
+  border-radius: var(--radius-md);
+  padding: var(--space-md);
+  margin-bottom: var(--space-md);
+}
+
+.type-selector-buttons {
+  display: flex;
+  gap: var(--space-sm);
+}
+
+.type-btn {
+  flex: 1;
+  padding: var(--space-sm) var(--space-xs);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
+  background: var(--color-bg-primary);
+  color: var(--color-text-secondary);
+  font-size: var(--text-xs);
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.type-btn.active {
+  color: var(--color-bg-primary);
+  transform: translateY(-1px);
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.15);
+}
+
+.type-btn.normal.active {
+  background: var(--color-firefly);
+  border-color: var(--color-firefly);
+}
+
+.type-btn.stairs.active {
+  background: #f97316; /* 階段オレンジ */
+  border-color: #f97316;
+}
+
+.type-btn.bridge.active {
+  background: #a8a29e; /* 橋グレー */
+  border-color: #a8a29e;
+}
+
+/* GPS現在位置アイコン */
+.gps-dot-marker {
+  position: relative;
+  width: 20px;
+  height: 20px;
+}
+
+.gps-dot-inner {
+  position: absolute;
+  top: 50%; left: 50%;
+  transform: translate(-50%, -50%);
+  width: 10px;
+  height: 10px;
+  background: #3b82f6;
+  border: 2px solid white;
+  border-radius: 50%;
+  box-shadow: 0 0 6px rgba(59, 130, 246, 0.8);
+  z-index: 10;
+}
+
+.gps-dot-pulse {
+  position: absolute;
+  top: 50%; left: 50%;
+  transform: translate(-50%, -50%);
+  width: 24px;
+  height: 24px;
+  background: rgba(59, 130, 246, 0.3);
+  border-radius: 50%;
+  animation: gps-pulse 1.8s infinite ease-out;
+}
+
+@keyframes gps-pulse {
+  0% { transform: translate(-50%, -50%) scale(0.5); opacity: 1; }
+  100% { transform: translate(-50%, -50%) scale(1.6); opacity: 0; }
+}
+
+/* 危険ゾーン */
+.danger-zone {
+  margin-top: var(--space-md);
+}
+
+

@@ -235,7 +235,7 @@ function LocationPicker() {
 }
 
 // 各コースの散策ルート座標配列（既存のピンを結ぶ）
-const courses = [
+const defaultCourses = [
   {
     id: 'donokoshi',
     name: '堂ノ腰コース',
@@ -274,6 +274,39 @@ const courses = [
   }
 ];
 
+// 同じ歩行属性（通常・階段・橋）ごとにPolylineを細分化する関数
+const getRouteSegments = (path) => {
+  if (!path || path.length < 2) return [];
+  
+  // 古い形式の [[lat, lng], ...] の配列かチェック
+  if (Array.isArray(path[0])) {
+    return [{ type: 'normal', coordinates: path }];
+  }
+
+  // 新しい形式の [{lat, lng, type}, ...] の配列
+  const segments = [];
+  let currentSegment = [path[0]];
+  let currentType = path[0].type || 'normal';
+
+  for (let i = 1; i < path.length; i++) {
+    const point = path[i];
+    const pointType = point.type || 'normal';
+
+    if (pointType === currentType) {
+      currentSegment.push(point);
+    } else {
+      currentSegment.push(point); // セグメント同士を接続する
+      segments.push({ type: currentType, coordinates: currentSegment.map(p => [p.lat, p.lng]) });
+      currentSegment = [point];
+      currentType = pointType;
+    }
+  }
+  if (currentSegment.length > 1) {
+    segments.push({ type: currentType, coordinates: currentSegment.map(p => [p.lat, p.lng]) });
+  }
+  return segments;
+};
+
 
 
 // ほたるマップページ
@@ -288,24 +321,38 @@ export default function MapPage() {
   const [isLocating, setIsLocating] = useState(false);
   const [shouldFollowUser, setShouldFollowUser] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
+  const [courses, setCourses] = useState(defaultCourses);
   const [currentZoom, setCurrentZoom] = useState(15.5);
-
-  // ナビゲーション関連
   const [compassHeading, setCompassHeading] = useState(null);
-
   const markerRefs = useRef({});
   const compassListenerRef = useRef(null);
   const center = [37.758621, 138.831192];
 
+  // 飛翔ポイント詳細のモーダル表示用のステート
+  const [lightboxOpen, setLightboxOpen] = useState(false);
+
   useEffect(() => {
     async function fetchData() {
       setIsLoading(true);
-      const [fpRes, plRes] = await Promise.all([
+      const [fpRes, plRes, routeRes] = await Promise.all([
         supabase.from('firefly_points').select('*').order('sort_order'),
         supabase.from('parking_lots').select('*').order('sort_order'),
+        supabase.from('course_routes').select('*')
       ]);
       if (fpRes.data) setFireflyPoints(fpRes.data);
       if (plRes.data) setParkingLots(plRes.data);
+      
+      if (routeRes.data && routeRes.data.length > 0) {
+        const updatedCourses = defaultCourses.map(dc => {
+          const dbRoute = routeRes.data.find(r => r.id === dc.id);
+          // DBに本番用データが存在し、かつ空でなければ適用
+          if (dbRoute && dbRoute.path && dbRoute.path.length > 0) {
+            return { ...dc, path: dbRoute.path, isDynamic: true };
+          }
+          return dc;
+        });
+        setCourses(updatedCourses);
+      }
       setIsLoading(false);
     }
     fetchData();
@@ -621,18 +668,41 @@ export default function MapPage() {
             {courses.map(course => {
               if (currentZoom < 17) return null;
               
-              return (
-                <Polyline
-                  key={course.id}
-                  positions={course.path}
-                  pathOptions={{
-                    color: 'var(--color-firefly)',
-                    weight: 3,
-                    opacity: 0.5,
-                    dashArray: '6, 10'
-                  }}
-                />
-              );
+              const segments = getRouteSegments(course.path);
+              
+              return segments.map((seg, idx) => {
+                let options = {
+                  color: 'var(--color-firefly)',
+                  weight: 3,
+                  opacity: 0.5,
+                  dashArray: '6, 10'
+                };
+                
+                if (seg.type === 'stairs') {
+                  // 階段: オレンジの実線＋ハシゴ状の点線
+                  options = {
+                    color: '#f97316', // オレンジ
+                    weight: 4,
+                    opacity: 0.75,
+                    dashArray: '3, 4'
+                  };
+                } else if (seg.type === 'bridge') {
+                  // 橋: 太い実線
+                  options = {
+                    color: '#a8a29e', // 温かみのあるグレー
+                    weight: 5.5,
+                    opacity: 0.8
+                  };
+                }
+                
+                return (
+                  <Polyline
+                    key={`${course.id}-seg-${idx}`}
+                    positions={seg.coordinates}
+                    pathOptions={options}
+                  />
+                );
+              });
             })}
 
             {/* 各コースの透かしラベル (固定位置) */}

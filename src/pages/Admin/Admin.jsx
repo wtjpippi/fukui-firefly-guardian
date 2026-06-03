@@ -1,9 +1,70 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { supabase } from '../../lib/supabaseClient';
 import Lightbox from "yet-another-react-lightbox";
 import "yet-another-react-lightbox/styles.css";
 import Zoom from "yet-another-react-lightbox/plugins/zoom";
+import { MapContainer, TileLayer, Polyline, Marker, Popup } from 'react-leaflet';
+import L from 'leaflet';
+import 'leaflet/dist/leaflet.css';
 import './Admin.css';
+
+// デフォルトの Marker アイコンバグ回避用
+delete L.Icon.Default.prototype._getIconUrl;
+L.Icon.Default.mergeOptions({
+  iconUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.7.1/images/marker-icon.png',
+  iconRetinaUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.7.1/images/marker-icon-2x.png',
+  shadowUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.7.1/images/marker-shadow.png',
+});
+
+// 現在位置のブルーGPSアイコン
+function createGpsDotIcon() {
+  return L.divIcon({
+    className: 'gps-dot-marker',
+    html: `<div class="gps-dot-pulse"></div><div class="gps-dot-inner"></div>`,
+    iconSize: [20, 20],
+    iconAnchor: [10, 10],
+  });
+}
+
+// 散策コースを属性(通常/階段/橋)に分割する関数 (Map.jsxと同様)
+const getRouteSegments = (path) => {
+  if (!path || path.length < 2) return [];
+  if (Array.isArray(path[0])) {
+    return [{ type: 'normal', coordinates: path }];
+  }
+  const segments = [];
+  let currentSegment = [path[0]];
+  let currentType = path[0].type || 'normal';
+  for (let i = 1; i < path.length; i++) {
+    const point = path[i];
+    const pointType = point.type || 'normal';
+    if (pointType === currentType) {
+      currentSegment.push(point);
+    } else {
+      currentSegment.push(point);
+      segments.push({ type: currentType, coordinates: currentSegment.map(p => [p.lat, p.lng]) });
+      currentSegment = [point];
+      currentType = pointType;
+    }
+  }
+  if (currentSegment.length > 1) {
+    segments.push({ type: currentType, coordinates: currentSegment.map(p => [p.lat, p.lng]) });
+  }
+  return segments;
+};
+
+// 2点間の距離(メートル)を計算する簡易関数 (GPSノイズ除去用)
+const getDistance = (lat1, lng1, lat2, lng2) => {
+  const R = 6371000;
+  const dLat = (lat2 - lat1) * Math.PI / 180;
+  const dLng = (lng2 - lng1) * Math.PI / 180;
+  const a = 
+    Math.sin(dLat/2) * Math.sin(dLat/2) +
+    Math.cos(lat1 * Math.PI / 180) * Math.cos(lat2 * Math.PI / 180) * 
+    Math.sin(dLng/2) * Math.sin(dLng/2);
+  const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+  return R * c;
+};
 
 // JST日時フォーマット（例: 2026/04/04 21:30）
 function formatJST(dateStr) {
@@ -59,6 +120,25 @@ export default function AdminPage() {
   const [lightboxOpen, setLightboxOpen] = useState(false);
   const [lightboxImages, setLightboxImages] = useState([]);
   const [lightboxIndex, setLightboxIndex] = useState(0);
+
+  // --- ルート記録用のステート ---
+  const [selectedCourseId, setSelectedCourseId] = useState('donokoshi');
+  const [isRecording, setIsRecording] = useState(false);
+  const [recordedPath, setRecordedPath] = useState([]);
+  const [currentPathType, setCurrentPathType] = useState('normal'); // 'normal' | 'stairs' | 'bridge'
+  const [watchId, setWatchId] = useState(null);
+  const [gpsError, setGpsError] = useState('');
+  const [currentGpsCoords, setCurrentGpsCoords] = useState(null);
+  const [gpsAccuracy, setGpsAccuracy] = useState(null);
+  const [dbRoutes, setDbRoutes] = useState({});
+  const [mapInstance, setMapInstance] = useState(null);
+
+  const courseOptions = [
+    { id: 'donokoshi', name: '堂ノ腰コース' },
+    { id: 'yuhodo', name: 'ほたる遊歩道' },
+    { id: 'genpei', name: '源平橋コース' },
+    { id: 'kanhotaru', name: '蛍観橋コース' }
+  ];
 
   // 画像を自動圧縮（最大800px幅、JPEG 80%品質）
   const compressImage = (file) => {
@@ -153,6 +233,7 @@ export default function AdminPage() {
   useEffect(() => {
     if (!isAuthenticated) return;
     fetchAll();
+    fetchRoutes();
   }, [isAuthenticated]);
 
   async function fetchAll() {
@@ -175,6 +256,195 @@ export default function AdminPage() {
     if (plRes.data) setParkingLots(plRes.data);
     if (rRes.data) setReports(rRes.data);
   }
+
+  const fetchRoutes = async () => {
+    const { data } = await supabase.from('course_routes').select('*');
+    if (data) {
+      const routeMap = {};
+      data.forEach(r => {
+        routeMap[r.id] = r;
+      });
+      setDbRoutes(routeMap);
+    }
+  };
+
+  // GPS追跡クリーンアップ
+  useEffect(() => {
+    return () => {
+      if (watchId !== null) {
+        navigator.geolocation.clearWatch(watchId);
+      }
+    };
+  }, [watchId]);
+
+  // GPS記録開始
+  const startGpsTracking = () => {
+    if (!navigator.geolocation) {
+      setGpsError('このデバイスはGPSをサポートしていません');
+      return;
+    }
+    if (!updaterName) {
+      alert('記録を開始する前に、ページ上部で「更新者名」を入力してください');
+      return;
+    }
+
+    setGpsError('');
+    setIsRecording(true);
+
+    const id = navigator.geolocation.watchPosition(
+      (position) => {
+        const { latitude, longitude, accuracy } = position.coords;
+        setCurrentGpsCoords([latitude, longitude]);
+        setGpsAccuracy(accuracy);
+
+        // 精度が30m以下のもののみ軌跡として採用（一時的な大きなブレを除去）
+        if (accuracy > 30) return;
+
+        setRecordedPath((prev) => {
+          if (prev.length === 0) {
+            return [{ lat: latitude, lng: longitude, type: currentPathType }];
+          }
+          const lastPoint = prev[prev.length - 1];
+          const distance = getDistance(lastPoint.lat, lastPoint.lng, latitude, longitude);
+          
+          // 前回の記録地点から 2.5 メートル以上移動している場合のみ記録（ノイズ軽減）
+          if (distance >= 2.5) {
+            return [...prev, { lat: latitude, lng: longitude, type: currentPathType }];
+          }
+          return prev;
+        });
+      },
+      (error) => {
+        console.error(error);
+        setGpsError(`位置情報の取得に失敗しました: ${error.message}`);
+      },
+      {
+        enableHighAccuracy: true,
+        timeout: 10000,
+        maximumAge: 0
+      }
+    );
+    setWatchId(id);
+  };
+
+  // GPS記録一時停止
+  const stopGpsTracking = () => {
+    if (watchId !== null) {
+      navigator.geolocation.clearWatch(watchId);
+      setWatchId(null);
+    }
+    setIsRecording(false);
+  };
+
+  // 記録のリセット
+  const resetRecordedRoute = () => {
+    if (confirm('記録中のデータをリセットして最初からやり直しますか？')) {
+      setRecordedPath([]);
+      setGpsError('');
+    }
+  };
+
+  // 下書きとして一時保存
+  const saveDraftRoute = async () => {
+    if (recordedPath.length < 2) {
+      alert('下書きとして保存するには少なくとも2箇所の地点を歩いて記録する必要があります');
+      return;
+    }
+    if (!updaterName) { alert('更新者の名前を入力してください'); return; }
+    
+    setSaving(true);
+    const { error } = await supabase
+      .from('course_routes')
+      .update({
+        draft_path: recordedPath,
+        updated_at: new Date().toISOString(),
+        updated_by: updaterName
+      })
+      .eq('id', selectedCourseId);
+      
+    if (error) {
+      alert(`下書き保存に失敗しました: ${error.message}`);
+    } else {
+      showSuccess('ルートを下書きとして一時保存しました（まだ本番には反映されていません）');
+      await fetchRoutes();
+    }
+    setSaving(false);
+  };
+
+  // 本番環境に公開
+  const publishRoute = async () => {
+    const courseRoute = dbRoutes[selectedCourseId];
+    if (!courseRoute || !courseRoute.draft_path || courseRoute.draft_path.length === 0) {
+      alert('公開する下書きデータがありません。先に歩いて下書き保存を行ってください。');
+      return;
+    }
+    if (!confirm('下書きルートを本番環境に公開し、一般ユーザーのマップに即座に反映しますか？')) {
+      return;
+    }
+    if (!updaterName) { alert('更新者の名前を入力してください'); return; }
+
+    setSaving(true);
+    const { error } = await supabase
+      .from('course_routes')
+      .update({
+        path: courseRoute.draft_path,
+        updated_at: new Date().toISOString(),
+        updated_by: updaterName
+      })
+      .eq('id', selectedCourseId);
+
+    if (error) {
+      alert(`公開に失敗しました: ${error.message}`);
+    } else {
+      showSuccess('ルートを本番環境に公開しました！');
+      await fetchRoutes();
+    }
+    setSaving(false);
+  };
+
+  // デフォルトルートへ初期化
+  const revertToDefaultRoute = async () => {
+    if (!confirm('本当にこのコースのルートをリセットし、プログラムの初期設定（シンプルな点線）に戻しますか？（歩いて記録したデータは完全に削除されます）')) {
+      return;
+    }
+    if (!updaterName) { alert('更新者の名前を入力してください'); return; }
+
+    setSaving(true);
+    const { error } = await supabase
+      .from('course_routes')
+      .update({
+        path: null,
+        draft_path: null,
+        updated_at: new Date().toISOString(),
+        updated_by: updaterName
+      })
+      .eq('id', selectedCourseId);
+
+    if (error) {
+      alert(`初期化に失敗しました: ${error.message}`);
+    } else {
+      showSuccess('ルートを初期状態（デフォルト）に戻しました');
+      setRecordedPath([]);
+      await fetchRoutes();
+    }
+    setSaving(false);
+  };
+
+  // 地図位置の自動追従
+  useEffect(() => {
+    if (mapInstance && currentGpsCoords) {
+      mapInstance.setView(currentGpsCoords, mapInstance.getZoom());
+    }
+  }, [currentGpsCoords, mapInstance]);
+
+  // タブ切り替え時に地図のサイズ再計算を行う (Leafletのグレーアウトバグ対策)
+  useEffect(() => {
+    if (activeTab === 'routes' && mapInstance) {
+      setTimeout(() => {
+        mapInstance.invalidateSize();
+      }, 100);
+    }
+  }, [activeTab, mapInstance]);
 
   const showSuccess = (msg) => {
     setSuccessMessage(msg);
@@ -373,6 +643,12 @@ export default function AdminPage() {
             onClick={() => setActiveTab('reports')}
           >
             📣 レポート
+          </button>
+          <button
+            className={`admin-tab ${activeTab === 'routes' ? 'active' : ''}`}
+            onClick={() => setActiveTab('routes')}
+          >
+            🗺️ ルート記録
           </button>
         </div>
 
@@ -580,6 +856,228 @@ export default function AdminPage() {
                 </div>
               );
             })}
+          </div>
+        )}
+
+        {/* ルート記録タブ */}
+        {activeTab === 'routes' && (
+          <div className="admin-section">
+            <h2>🗺️ スマホGPSルートレコーダー</h2>
+            <p className="admin-help-text" style={{ marginBottom: 'var(--space-md)' }}>
+              実際にスマホを持って現地を歩き、散策ルートの曲線をマッピングできます。
+              <strong>「通常の道」「階段」「橋」</strong> を切り替えながら記録可能です。
+            </p>
+
+            <div className="admin-card">
+              {/* ① コース選択 */}
+              <div className="admin-form-group" style={{ marginBottom: 'var(--space-md)' }}>
+                <label>記録する対象コース</label>
+                <select
+                  value={selectedCourseId}
+                  onChange={(e) => {
+                    setSelectedCourseId(e.target.value);
+                    setRecordedPath([]);
+                  }}
+                  className="admin-select"
+                  disabled={isRecording}
+                >
+                  {courseOptions.map(opt => (
+                    <option key={opt.id} value={opt.id}>{opt.name}</option>
+                  ))}
+                </select>
+              </div>
+
+              {/* ② GPSの精度とステータス表示 */}
+              <div className="gps-status-panel">
+                <div className="gps-status-row">
+                  <span>GPS状態: </span>
+                  <span className={isRecording ? 'status-active' : 'status-inactive'}>
+                    {isRecording ? '🔴 記録中' : '⚪ 停止中'}
+                  </span>
+                </div>
+                {gpsError && <div className="admin-error" style={{ marginTop: '5px' }}>{gpsError}</div>}
+                {currentGpsCoords && (
+                  <div className="gps-metadata" style={{ fontSize: '11px', color: 'var(--color-text-secondary)', marginTop: '5px' }}>
+                    緯度: {currentGpsCoords[0].toFixed(6)} / 経度: {currentGpsCoords[1].toFixed(6)} 
+                    {gpsAccuracy && ` (精度: ±${Math.round(gpsAccuracy)}m)`}
+                  </div>
+                )}
+              </div>
+
+              {/* ③ スマホ操作用の大きなコントロールボタン */}
+              <div className="recorder-controls">
+                {!isRecording ? (
+                  <button onClick={startGpsTracking} className="recorder-btn start" disabled={saving}>
+                    🔴 記録を開始
+                  </button>
+                ) : (
+                  <button onClick={stopGpsTracking} className="recorder-btn stop">
+                    ⏸ 記録を一時停止
+                  </button>
+                )}
+                <button onClick={resetRecordedRoute} className="recorder-btn reset" disabled={isRecording || recordedPath.length === 0 || saving}>
+                  🗑️ クリア (やり直し)
+                </button>
+              </div>
+
+              {/* ④ 地面タイプ切り替え (記録中のみ有効) */}
+              {isRecording && (
+                <div className="type-selector-container">
+                  <label style={{ fontSize: '12px', fontWeight: 'bold', display: 'block', marginBottom: '8px', color: 'var(--color-firefly)' }}>
+                    👇 地面のタイプを切り替える（歩きながらタップしてください）
+                  </label>
+                  <div className="type-selector-buttons">
+                    <button
+                      type="button"
+                      className={`type-btn normal ${currentPathType === 'normal' ? 'active' : ''}`}
+                      onClick={() => setCurrentPathType('normal')}
+                    >
+                      🚶 通常の道
+                    </button>
+                    <button
+                      type="button"
+                      className={`type-btn stairs ${currentPathType === 'stairs' ? 'active' : ''}`}
+                      onClick={() => setCurrentPathType('stairs')}
+                    >
+                      🪜 階段
+                    </button>
+                    <button
+                      type="button"
+                      className={`type-btn bridge ${currentPathType === 'bridge' ? 'active' : ''}`}
+                      onClick={() => setCurrentPathType('bridge')}
+                    >
+                      🌉 橋
+                    </button>
+                  </div>
+                </div>
+              )}
+
+              {/* ⑤ 記録中のプレビューマップ */}
+              <div className="recorder-map-container" style={{ height: '300px', margin: 'var(--space-md) 0', borderRadius: 'var(--radius-md)', overflow: 'hidden', border: '1px solid var(--color-border)' }}>
+                <MapContainer
+                  center={[37.758621, 138.831192]}
+                  zoom={16.5}
+                  style={{ height: '100%', width: '100%' }}
+                  ref={setMapInstance}
+                >
+                  <TileLayer
+                    url="https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}"
+                    attribution="Tiles &copy; Esri &mdash; Source: Esri, i-cubed, USDA, USGS, AEX, GeoEye, Getmapping, Aerogrid, IGN, IGP, UPR-EBP, and the GIS User Community"
+                    maxNativeZoom={19}
+                    maxZoom={20}
+                  />
+                  {/* データベースに既に保存されている公開ルート (暗めの緑) */}
+                  {dbRoutes[selectedCourseId]?.path && (
+                    getRouteSegments(dbRoutes[selectedCourseId].path).map((seg, idx) => (
+                      <Polyline
+                        key={`pub-${idx}`}
+                        positions={seg.coordinates}
+                        pathOptions={{
+                          color: '#047857',
+                          weight: 2.5,
+                          opacity: 0.4,
+                          dashArray: seg.type === 'stairs' ? '2, 3' : seg.type === 'bridge' ? '' : '4, 4'
+                        }}
+                      />
+                    ))
+                  )}
+
+                  {/* データベースに既に保存されている下書きルート (黄色の点線) */}
+                  {dbRoutes[selectedCourseId]?.draft_path && (
+                    getRouteSegments(dbRoutes[selectedCourseId].draft_path).map((seg, idx) => (
+                      <Polyline
+                        key={`draft-${idx}`}
+                        positions={seg.coordinates}
+                        pathOptions={{
+                          color: '#eab308',
+                          weight: 3,
+                          opacity: 0.6,
+                          dashArray: '3, 6'
+                        }}
+                      />
+                    ))
+                  )}
+
+                  {/* 現在リアルタイムに記録している軌跡 (明るい蛍色 / 階段はオレンジ / 橋は太グレー) */}
+                  {recordedPath.length > 0 && (
+                    getRouteSegments(recordedPath).map((seg, idx) => {
+                      let color = 'var(--color-firefly)';
+                      let dashArray = '6, 10';
+                      let weight = 3;
+
+                      if (seg.type === 'stairs') {
+                        color = '#f97316'; // オレンジ
+                        dashArray = '3, 4';
+                        weight = 4;
+                      } else if (seg.type === 'bridge') {
+                        color = '#a8a29e'; // 橋グレー
+                        dashArray = ''; // 実線
+                        weight = 5.5;
+                      }
+
+                      return (
+                        <Polyline
+                          key={`live-${idx}`}
+                          positions={seg.coordinates}
+                          pathOptions={{ color, weight, opacity: 0.9, dashArray }}
+                        />
+                      );
+                    })
+                  )}
+
+                  {/* GPSの現在地マーカー */}
+                  {currentGpsCoords && (
+                    <Marker position={currentGpsCoords} icon={createGpsDotIcon()} />
+                  )}
+                </MapContainer>
+              </div>
+
+              {/* ⑥ 保存・公開制御 (プレビュー・承認フロー) */}
+              <div className="route-actions-panel">
+                <div style={{ display: 'flex', gap: 'var(--space-sm)', flexWrap: 'wrap', marginBottom: 'var(--space-md)' }}>
+                  <button
+                    onClick={saveDraftRoute}
+                    className="admin-btn secondary"
+                    disabled={isRecording || recordedPath.length < 2 || saving}
+                    style={{ flex: 1, minWidth: '140px' }}
+                  >
+                    💾 下書きとして保存
+                  </button>
+                  <button
+                    onClick={publishRoute}
+                    className="admin-btn primary"
+                    disabled={isRecording || !dbRoutes[selectedCourseId]?.draft_path || saving}
+                    style={{ flex: 1, minWidth: '140px' }}
+                  >
+                    🚀 本番に公開 (反映)
+                  </button>
+                </div>
+
+                <div className="danger-zone" style={{ borderTop: '1px solid var(--color-border)', paddingTop: 'var(--space-md)' }}>
+                  <h4 style={{ color: '#ef4444', fontSize: '13px', marginBottom: '5px' }}>⚠️ 危険ゾーン</h4>
+                  <button
+                    onClick={revertToDefaultRoute}
+                    className="admin-btn danger small"
+                    disabled={isRecording || saving}
+                  >
+                    🔄 初期設定（既存の点線）に戻す
+                  </button>
+                </div>
+              </div>
+
+              {/* ⑦ 現在保存されているメタ情報の表示 */}
+              <div className="route-meta-info" style={{ marginTop: 'var(--space-md)', fontSize: '11px', color: 'var(--color-text-secondary)', background: 'rgba(255,255,255,0.02)', padding: '10px', borderRadius: '4px' }}>
+                <div>・<strong>現在の本番データ</strong>: {dbRoutes[selectedCourseId]?.path ? '✅ 登録済み' : '❌ 未登録 (既存の点線を使用中)'}</div>
+                <div>・<strong>現在の保存下書き</strong>: {dbRoutes[selectedCourseId]?.draft_path ? '✅ 下書きあり（黄色点線）' : '❌ なし'}</div>
+                {dbRoutes[selectedCourseId]?.updated_at && (
+                  <div style={{ marginTop: '4px' }}>
+                    最終更新: {formatJST(dbRoutes[selectedCourseId].updated_at)} 
+                    {dbRoutes[selectedCourseId].updated_by && ` (by ${dbRoutes[selectedCourseId].updated_by})`}
+                  </div>
+                )}
+              </div>
+
+            </div>
           </div>
         )}
       </div>
