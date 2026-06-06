@@ -126,12 +126,18 @@ export default function AdminPage() {
   const [isRecording, setIsRecording] = useState(false);
   const [recordedPath, setRecordedPath] = useState([]);
   const [currentPathType, setCurrentPathType] = useState('normal'); // 'normal' | 'stairs' | 'bridge'
+  const pathTypeRef = useRef('normal');
   const [watchId, setWatchId] = useState(null);
   const [gpsError, setGpsError] = useState('');
   const [currentGpsCoords, setCurrentGpsCoords] = useState(null);
   const [gpsAccuracy, setGpsAccuracy] = useState(null);
   const [dbRoutes, setDbRoutes] = useState({});
   const [mapInstance, setMapInstance] = useState(null);
+
+  // 歩行タイプ (通常/階段/橋) のステートとRefを同期 (GPSコールバックのクロージャ対策)
+  useEffect(() => {
+    pathTypeRef.current = currentPathType;
+  }, [currentPathType]);
 
   const courseOptions = [
     { id: 'donokoshi', name: '堂ノ腰コース' },
@@ -302,14 +308,14 @@ export default function AdminPage() {
 
         setRecordedPath((prev) => {
           if (prev.length === 0) {
-            return [{ lat: latitude, lng: longitude, type: currentPathType }];
+            return [{ lat: latitude, lng: longitude, type: pathTypeRef.current }];
           }
           const lastPoint = prev[prev.length - 1];
           const distance = getDistance(lastPoint.lat, lastPoint.lng, latitude, longitude);
           
           // 前回の記録地点から 2.5 メートル以上移動している場合のみ記録（ノイズ軽減）
           if (distance >= 2.5) {
-            return [...prev, { lat: latitude, lng: longitude, type: currentPathType }];
+            return [...prev, { lat: latitude, lng: longitude, type: pathTypeRef.current }];
           }
           return prev;
         });
@@ -1034,6 +1040,33 @@ export default function AdminPage() {
 
               {/* ⑥ 保存・公開制御 (プレビュー・承認フロー) */}
               <div className="route-actions-panel">
+                <div style={{ marginBottom: 'var(--space-md)', textAlign: 'center' }}>
+                  <a 
+                    href="/map?preview=true" 
+                    target="_blank" 
+                    rel="noopener noreferrer" 
+                    className="preview-link"
+                    style={{
+                      display: 'inline-flex',
+                      alignItems: 'center',
+                      gap: '6px',
+                      color: 'var(--color-firefly)',
+                      textDecoration: 'none',
+                      fontSize: '13px',
+                      fontWeight: 'bold',
+                      border: '1px solid var(--color-firefly)',
+                      padding: '8px 16px',
+                      borderRadius: '4px',
+                      background: 'rgba(200, 230, 78, 0.05)'
+                    }}
+                  >
+                    🗺️ プレビュー用マップで下書きを確認する
+                  </a>
+                  <p className="admin-help-text" style={{ marginTop: '6px', fontSize: '11px' }}>
+                    ※ 下書き保存した後、公開する前に必ず上記リンクから実際の見え方・端点スナップを確認してください。
+                  </p>
+                </div>
+
                 <div style={{ display: 'flex', gap: 'var(--space-sm)', flexWrap: 'wrap', marginBottom: 'var(--space-md)' }}>
                   <button
                     onClick={saveDraftRoute}

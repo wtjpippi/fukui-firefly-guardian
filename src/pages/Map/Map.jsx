@@ -265,7 +265,7 @@ const defaultCourses = [
     ]
   },
   {
-    id: 'keikan',
+    id: 'kanhotaru',
     name: '蛍観橋コース',
     path: [
       [37.758811, 138.833730], // 駐車場 P4
@@ -307,7 +307,86 @@ const getRouteSegments = (path) => {
   return segments;
 };
 
+// 移動平均法によるルートデータのなだらか化（平滑化）フィルター
+const smoothPath = (path, windowSize = 5) => {
+  if (!path || path.length < windowSize) return path;
 
+  const isArrayFormat = Array.isArray(path[0]);
+  const smoothed = [];
+  const halfWindow = Math.floor(windowSize / 2);
+
+  for (let i = 0; i < path.length; i++) {
+    // 端点は固定してルートの接続位置がずれないようにする
+    if (i < halfWindow || i >= path.length - halfWindow) {
+      smoothed.push(path[i]);
+      continue;
+    }
+
+    let sumLat = 0;
+    let sumLng = 0;
+    let count = 0;
+
+    for (let w = -halfWindow; w <= halfWindow; w++) {
+      const idx = i + w;
+      const p = path[idx];
+      sumLat += isArrayFormat ? p[0] : p.lat;
+      sumLng += isArrayFormat ? p[1] : p.lng;
+      count++;
+    }
+
+    const avgLat = sumLat / count;
+    const avgLng = sumLng / count;
+
+    if (isArrayFormat) {
+      smoothed.push([avgLat, avgLng]);
+    } else {
+      smoothed.push({
+        ...path[i],
+        lat: avgLat,
+        lng: avgLng
+      });
+    }
+  }
+
+  return smoothed;
+};
+
+// 各コースの正式なスタート・ゴール端点座標 (GPS開始/終了時のズレ防止用)
+const courseTerminals = {
+  donokoshi: {
+    start: [37.758621, 138.831192], // お祭り会場
+    end: [37.756259, 138.834314]   // 堂ノ腰コース　林道出口
+  }
+};
+
+// ルートの最初と最後の点を正式なピン座標に自動吸着させる関数
+const snapTerminals = (courseId, path) => {
+  if (!path || path.length < 2) return path;
+  const terminals = courseTerminals[courseId];
+  if (!terminals) return path;
+
+  // Reactのステート汚染を防ぐためディープコピーを作成
+  const result = JSON.parse(JSON.stringify(path));
+
+  // 最初の一点をスナップ
+  if (Array.isArray(result[0])) {
+    result[0] = [...terminals.start];
+  } else {
+    result[0].lat = terminals.start[0];
+    result[0].lng = terminals.start[1];
+  }
+
+  // 最後の一点をスナップ
+  const lastIdx = result.length - 1;
+  if (Array.isArray(result[lastIdx])) {
+    result[lastIdx] = [...terminals.end];
+  } else {
+    result[lastIdx].lat = terminals.end[0];
+    result[lastIdx].lng = terminals.end[1];
+  }
+
+  return result;
+};
 
 // ほたるマップページ
 export default function MapPage() {
@@ -332,6 +411,10 @@ export default function MapPage() {
   const [lightboxOpen, setLightboxOpen] = useState(false);
 
   useEffect(() => {
+    // URLのパラメータに ?preview=true が含まれているか判定
+    const params = new URLSearchParams(window.location.search);
+    const isPreviewMode = params.get('preview') === 'true';
+
     async function fetchData() {
       setIsLoading(true);
       const [fpRes, plRes, routeRes] = await Promise.all([
@@ -345,9 +428,12 @@ export default function MapPage() {
       if (routeRes.data && routeRes.data.length > 0) {
         const updatedCourses = defaultCourses.map(dc => {
           const dbRoute = routeRes.data.find(r => r.id === dc.id);
-          // DBに本番用データが存在し、かつ空でなければ適用
-          if (dbRoute && dbRoute.path && dbRoute.path.length > 0) {
-            return { ...dc, path: dbRoute.path, isDynamic: true };
+          if (dbRoute) {
+            // プレビューモードの場合は下書き（draft_path）を優先読み込み
+            const pathToUse = isPreviewMode ? dbRoute.draft_path : dbRoute.path;
+            if (pathToUse && pathToUse.length > 0) {
+              return { ...dc, path: pathToUse, isDynamic: true };
+            }
           }
           return dc;
         });
@@ -668,7 +754,11 @@ export default function MapPage() {
             {courses.map(course => {
               if (currentZoom < 17) return null;
               
-              const segments = getRouteSegments(course.path);
+              // 実際に歩いたルート（動的ルート）の場合のみ、前後の平均を取ってなだらかに補正する
+              let displayPath = course.isDynamic ? smoothPath(course.path, 5) : course.path;
+              // 登録されている正式な端点ピンにピタッと自動吸着（スナップ）させる
+              displayPath = snapTerminals(course.id, displayPath);
+              const segments = getRouteSegments(displayPath);
               
               return segments.map((seg, idx) => {
                 let options = {
@@ -679,7 +769,7 @@ export default function MapPage() {
                 };
                 
                 if (seg.type === 'stairs') {
-                  // 階段: オレンジの実線＋ハシゴ状の点線
+                  // 階段: オレンジの実線＋ハシゴ状 of 点線
                   options = {
                     color: '#f97316', // オレンジ
                     weight: 4,
