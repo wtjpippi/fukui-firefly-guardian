@@ -18,6 +18,7 @@ const PARKING_REALTIME_ENABLED = false;
 const statusLabels = {
   peak: { label: '乱舞中', badge: 'badge-peak' },
   high: { label: '数多い', badge: 'badge-high' },
+  past_peak: { label: 'ピーク過ぎ', badge: 'badge-past-peak' },
   medium: { label: '飛び始め', badge: 'badge-medium' },
   low: { label: 'まだ見えない', badge: 'badge-low' },
 };
@@ -30,7 +31,7 @@ const parkingLabels = {
 };
 
 function createFireflyIcon(status) {
-  const colors = { peak: '#10b981', high: '#eab308', medium: '#f97316', low: '#6b7280' };
+  const colors = { peak: '#10b981', high: '#eab308', past_peak: '#84cc16', medium: '#f97316', low: '#6b7280' };
   const color = colors[status] || colors.low;
 
   return L.divIcon({
@@ -911,6 +912,9 @@ export default function MapPage() {
                 </div>
                 <div className="map-legend-item">
                   <span className="legend-dot high" /> 数多い
+                </div>
+                <div className="map-legend-item">
+                  <span className="legend-dot past-peak" /> ピーク過ぎ
                 </div>
                 <div className="map-legend-item">
                   <span className="legend-dot medium" /> 飛び始め

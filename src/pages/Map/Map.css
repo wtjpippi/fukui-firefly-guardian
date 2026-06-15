@@ -209,6 +209,11 @@
   box-shadow: 0 0 6px var(--color-status-high);
 }
 
+.legend-dot.past-peak {
+  background: var(--color-status-past-peak);
+  box-shadow: 0 0 6px var(--color-status-past-peak);
+}
+
 .legend-dot.medium {
   background: var(--color-status-medium);
   box-shadow: 0 0 6px var(--color-status-medium);

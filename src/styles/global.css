@@ -179,6 +179,11 @@ ol {
   color: var(--color-status-high);
 }
 
+.badge-past-peak {
+  background: rgba(132, 204, 22, 0.15);
+  color: var(--color-status-past-peak);
+}
+
 .badge-medium {
   background: rgba(249, 115, 22, 0.15);
   color: var(--color-status-medium);

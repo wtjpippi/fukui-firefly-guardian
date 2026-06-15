@@ -10,7 +10,7 @@ CREATE TABLE firefly_points (
   course TEXT NOT NULL,
   lat DOUBLE PRECISION NOT NULL,
   lng DOUBLE PRECISION NOT NULL,
-  status TEXT NOT NULL DEFAULT 'low' CHECK (status IN ('peak', 'high', 'medium', 'low')),
+  status TEXT NOT NULL DEFAULT 'low' CHECK (status IN ('peak', 'high', 'past_peak', 'medium', 'low')),
   description TEXT,
   updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
   updated_by TEXT

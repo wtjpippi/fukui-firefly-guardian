@@ -21,6 +21,7 @@
   /* Status Colors */
   --color-status-peak: #10b981;
   --color-status-high: #eab308;
+  --color-status-past-peak: #84cc16;
   --color-status-medium: #f97316;
   --color-status-low: #6b7280;
   --color-status-full: #ef4444;

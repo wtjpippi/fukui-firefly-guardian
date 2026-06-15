@@ -77,6 +77,7 @@ const statusOptions = {
   firefly: [
     { value: 'peak', label: '🟢 乱舞中' },
     { value: 'high', label: '🟡 数多い' },
+    { value: 'past_peak', label: '🫒 ピーク過ぎ（減少期）' },
     { value: 'medium', label: '🟠 飛び始め' },
     { value: 'low', label: '⚫ まだ見えない' },
   ],

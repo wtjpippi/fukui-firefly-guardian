@@ -77,9 +77,9 @@ export const fireflyPoints = [
     lat: 37.757093,
     lng: 138.835060,
     course: '源平橋コース',
-    status: 'low',
-    lastUpdated: '2026-03-31T18:40:00',
-    description: 'これからの飛翔に期待です',
+    status: 'past_peak',
+    lastUpdated: '2026-06-16T05:00:00',
+    description: '見頃のピークは過ぎましたが、まだ数匹のほたるが舞っています',
   },
   {
     id: 'point-genpei-4',
