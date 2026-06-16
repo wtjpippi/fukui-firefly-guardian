@@ -18,7 +18,7 @@ const PARKING_REALTIME_ENABLED = false;
 const statusLabels = {
   peak: { label: '乱舞中', badge: 'badge-peak' },
   high: { label: '数多い', badge: 'badge-high' },
-  past_peak: { label: 'ピーク過ぎ', badge: 'badge-past-peak' },
+  past_peak: { label: 'ピーク過ぎた', badge: 'badge-past-peak' },
   medium: { label: '飛び始め', badge: 'badge-medium' },
   low: { label: 'まだ見えない', badge: 'badge-low' },
 };
@@ -914,7 +914,7 @@ export default function MapPage() {
                   <span className="legend-dot high" /> 数多い
                 </div>
                 <div className="map-legend-item">
-                  <span className="legend-dot past-peak" /> ピーク過ぎ
+                  <span className="legend-dot past-peak" /> ピーク過ぎた
                 </div>
                 <div className="map-legend-item">
                   <span className="legend-dot medium" /> 飛び始め
