@@ -44,8 +44,8 @@ export const fireflyPoints = [
   {
     id: 'point-donokoshi-4',
     name: 'ほたる遊歩道',
-    lat: 37.757668,
-    lng: 138.831283,
+    lat: 37.757910,
+    lng: 138.830865,
     course: 'ほたる遊歩道',
     status: 'medium',
     lastUpdated: '2026-04-01T19:10:00',
