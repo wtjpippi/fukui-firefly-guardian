@@ -1,4 +1,4 @@
-import { Link, NavLink } from 'react-router-dom';
+import { Link, NavLink, useLocation } from 'react-router-dom';
 import { Menu, X } from 'lucide-react';
 import { useState, useEffect } from 'react';
 import Navigation from '../Navigation/Navigation';
@@ -19,6 +19,16 @@ const navItems = [
 
 export default function Header() {
   const [menuOpen, setMenuOpen] = useState(false);
+  const location = useLocation();
+
+  // ページ遷移（URL変更）を検知してメニューを閉じ、履歴状態をリセット
+  useEffect(() => {
+    setMenuOpen(false);
+    if (window.history.state && window.history.state.menu) {
+      // 履歴状態をクリアして、新しいページで「戻る」を押した際にメニューが開かないようにする
+      window.history.replaceState(null, '');
+    }
+  }, [location]);
 
   // 戻るボタンなどの履歴操作を検知してメニューを閉じる
   useEffect(() => {
@@ -79,6 +89,7 @@ export default function Header() {
         items={navItems}
         isOpen={menuOpen}
         onClose={() => toggleMenu(false)}
+        onLinkClick={() => setMenuOpen(false)} // リンククリック時は直接閉じる
       />
     </>
   );

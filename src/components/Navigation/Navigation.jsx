@@ -15,7 +15,7 @@ const navIcons = {
   '/contact': '✉️',
 };
 
-export default function Navigation({ items, isOpen, onClose }) {
+export default function Navigation({ items, isOpen, onClose, onLinkClick }) {
   return (
     <>
       <div
@@ -35,7 +35,7 @@ export default function Navigation({ items, isOpen, onClose }) {
               key={item.path}
               to={item.path}
               className={({ isActive }) => `nav-link ${isActive ? 'active' : ''}`}
-              onClick={onClose}
+              onClick={onLinkClick}
               end={item.path === '/'}
             >
               <span className="nav-link-icon">{navIcons[item.path]}</span>
