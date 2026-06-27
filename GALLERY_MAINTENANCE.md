@@ -71,4 +71,43 @@ export const galleryData = [
     - 1年度あたり 6枚〜12枚 程度が、レイアウト的に最も綺麗に見えます。
 
 ---
+
+## 4. 画像の一括自動圧縮手順
+
+画像ファイルが大きすぎると、サイトの読み込み速度低下や、Vercelの月間転送量（100GB制限）を圧迫する原因になります。
+
+プロジェクトの `scripts/` ディレクトリ内に、画像を自動で最適化するPowerShellスクリプト [compress_images.ps1](file:///c:/Users/DP/Desktop/fukuihotaru/scripts/compress_images.ps1) を用意してあります。
+
+### 🤖 AIアシスタントに依頼して自動実行する場合
+フォルダ（`public/images/` の中など）に画像をそのまま置いた状態で、チャットで以下のように指示するだけで、AIが画像の自動圧縮からGitHubへのアップロードまでを全自動で実行します。
+> 「画像を追加したので、画像圧縮スクリプト（`scripts/compress_images.ps1`）を実行して、軽量化された写真をGitHubにプッシュしてください」
+
+### 💻 手動で（ご自身のPCで）実行する場合
+1. Windows PowerShell を起動します。
+2. プロジェクトのフォルダに移動します：
+   ```powershell
+   cd C:\Users\DP\Desktop\fukuihotaru
+   ```
+3. スクリプトを実行します（1MBを超える画像が自動で幅1600px・画質75%の軽量なJPGに上書き圧縮されます）：
+   ```powershell
+   powershell -ExecutionPolicy Bypass -File scripts/compress_images.ps1
+   ```
+
+---
+
+## 5. スマホ「戻る」ボタンによるポップアップ・メニュークローズ制御 (History API)
+
+スマートフォンでの操作時、画像拡大ポップアップ（Lightbox）やスマホ用メニュー画面が開いている状態で「戻る」操作をしても、ページ全体が戻らずにポップアップ類だけがスムーズに閉じるよう、ブラウザ履歴（History API / ハッシュ）と連動した制御を組み込んでいます。
+
+### 🛠️ 実装箇所と仕組み
+*   **スマホメニュー**: [Header.jsx](file:///c:/Users/DP/Desktop/fukuihotaru/src/components/Header/Header.jsx)
+    *   メニューを開いた際にURL末尾に `#menu` 履歴を追加。戻る操作でハッシュが消えた時（`popstate`）にメニューを閉じます。
+*   **お祭りギャラリー**: [Gallery.jsx](file:///c:/Users/DP/Desktop/fukuihotaru/src/pages/Gallery/Gallery.jsx)
+    *   画像拡大時に URL に `#gallery` を追加。戻る操作を検知して画像を閉じます。
+*   **地元のお店**: [LocalGuide.jsx](file:///c:/Users/DP/Desktop/fukuihotaru/src/pages/LocalGuide/LocalGuide.jsx)
+    *   店舗写真拡大時に URL に `#shop-gallery` を追加。同様に戻る操作で画像を閉じます。
+
+今後新しく画面全体を覆うようなポップアップやモーダル、メニューを新規作成する際は、上記ファイルを参考に `popstate` イベントのリスナーを設定してください。
+
+---
 このマニュアルを参考に、福井ほたる祭りの歴史を積み重ねていってください！
