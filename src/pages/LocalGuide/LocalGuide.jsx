@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import Lightbox from 'yet-another-react-lightbox';
 import 'yet-another-react-lightbox/styles.css';
 import './LocalGuide.css';
@@ -9,9 +9,30 @@ export default function LocalGuide() {
   const [lightboxImages, setLightboxImages] = useState([]);
   const [imageErrors, setImageErrors] = useState({}); // 画像読み込みエラー検知用
 
+  // 戻るボタンなどの履歴操作を検知してLightboxを閉じる
+  useEffect(() => {
+    const handlePopState = () => {
+      if (window.location.hash !== '#shop-gallery') {
+        setLightboxIndex(-1);
+      }
+    };
+    window.addEventListener('popstate', handlePopState);
+    return () => {
+      window.removeEventListener('popstate', handlePopState);
+    };
+  }, []);
+
   const openProductLightbox = (images) => {
     setLightboxImages(images.map(img => ({ src: img, alt: '商品写真' })));
+    window.location.hash = 'shop-gallery';
     setLightboxIndex(0);
+  };
+
+  const closeProductLightbox = () => {
+    if (window.location.hash === '#shop-gallery') {
+      window.history.back();
+    }
+    setLightboxIndex(-1);
   };
 
   const shops = [
@@ -266,7 +287,7 @@ export default function LocalGuide() {
       <Lightbox
         index={lightboxIndex}
         open={lightboxIndex >= 0}
-        close={() => setLightboxIndex(-1)}
+        close={closeProductLightbox}
         slides={lightboxImages}
       />
     </div>

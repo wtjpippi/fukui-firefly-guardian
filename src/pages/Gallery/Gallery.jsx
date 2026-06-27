@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import Lightbox from 'yet-another-react-lightbox';
 import 'yet-another-react-lightbox/styles.css';
 import { galleryData } from '../../data/mockData';
@@ -11,12 +11,30 @@ export default function Gallery() {
   const [currentImages, setCurrentImages] = useState([]);
   const [activeCategory, setActiveCategory] = useState('all');
 
-  // 近年の様子（Recent）のデータを取得
-  const recentData = galleryData.find(d => d.year === 'Recent');
+  // 戻るボタンなどの履歴操作を検知してLightboxを閉じる
+  useEffect(() => {
+    const handlePopState = () => {
+      if (window.location.hash !== '#gallery') {
+        setIndex(-1);
+      }
+    };
+    window.addEventListener('popstate', handlePopState);
+    return () => {
+      window.removeEventListener('popstate', handlePopState);
+    };
+  }, []);
 
   const openLightbox = (images, photoIndex) => {
     setCurrentImages(images.map(img => ({ src: img.url, alt: img.alt || 'ほたるまつり写真', title: img.title || '' })));
+    window.location.hash = 'gallery';
     setIndex(photoIndex);
+  };
+
+  const closeLightbox = () => {
+    if (window.location.hash === '#gallery') {
+      window.history.back();
+    }
+    setIndex(-1);
   };
 
   // 2026年の選択されたカテゴリに応じた画像フィルタリング
@@ -199,7 +217,7 @@ export default function Gallery() {
       <Lightbox
         index={index}
         open={index >= 0}
-        close={() => setIndex(-1)}
+        close={closeLightbox}
         slides={currentImages}
       />
     </div>

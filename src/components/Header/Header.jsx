@@ -1,6 +1,6 @@
 import { Link, NavLink } from 'react-router-dom';
 import { Menu, X } from 'lucide-react';
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import Navigation from '../Navigation/Navigation';
 import './Header.css';
 
@@ -20,10 +20,35 @@ const navItems = [
 export default function Header() {
   const [menuOpen, setMenuOpen] = useState(false);
 
+  // 戻るボタンなどの履歴操作を検知してメニューを閉じる
+  useEffect(() => {
+    const handlePopState = () => {
+      if (window.location.hash !== '#menu') {
+        setMenuOpen(false);
+      }
+    };
+    window.addEventListener('popstate', handlePopState);
+    return () => {
+      window.removeEventListener('popstate', handlePopState);
+    };
+  }, []);
+
+  const toggleMenu = (open) => {
+    if (open) {
+      window.location.hash = 'menu';
+      setMenuOpen(true);
+    } else {
+      if (window.location.hash === '#menu') {
+        window.history.back();
+      }
+      setMenuOpen(false);
+    }
+  };
+
   return (
     <>
       <header className="header">
-        <Link to="/" className="header-logo">
+        <Link to="/" className="header-logo" onClick={() => toggleMenu(false)}>
           {/* public/icons フォルダ内の custom-logo.png を読み込みます */}
           <img src="/icons/custom-logo.png" alt="福井のほたる ロゴ" className="header-logo-icon-img" />
           <span className="header-logo-text">福井のほたる</span>
@@ -43,7 +68,7 @@ export default function Header() {
 
         <button
           className="menu-button"
-          onClick={() => setMenuOpen(!menuOpen)}
+          onClick={() => toggleMenu(!menuOpen)}
           aria-label="メニュー"
         >
           {menuOpen ? <X size={24} /> : <Menu size={24} />}
@@ -53,7 +78,7 @@ export default function Header() {
       <Navigation
         items={navItems}
         isOpen={menuOpen}
-        onClose={() => setMenuOpen(false)}
+        onClose={() => toggleMenu(false)}
       />
     </>
   );
