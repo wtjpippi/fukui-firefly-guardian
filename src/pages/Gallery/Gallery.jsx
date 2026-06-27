@@ -11,6 +11,9 @@ export default function Gallery() {
   const [currentImages, setCurrentImages] = useState([]);
   const [activeCategory, setActiveCategory] = useState('all');
 
+  // 近年の様子（Recent）のデータを取得
+  const recentData = galleryData.find(d => d.year === 'Recent');
+
   // 戻るボタンなどの履歴操作を検知してLightboxを閉じる
   useEffect(() => {
     const handlePopState = (event) => {
