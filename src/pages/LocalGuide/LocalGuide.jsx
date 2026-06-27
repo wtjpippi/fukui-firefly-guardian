@@ -11,8 +11,8 @@ export default function LocalGuide() {
 
   // 戻るボタンなどの履歴操作を検知してLightboxを閉じる
   useEffect(() => {
-    const handlePopState = () => {
-      if (window.location.hash !== '#shop-gallery') {
+    const handlePopState = (event) => {
+      if (!event.state || !event.state.shopLightbox) {
         setLightboxIndex(-1);
       }
     };
@@ -24,12 +24,12 @@ export default function LocalGuide() {
 
   const openProductLightbox = (images) => {
     setLightboxImages(images.map(img => ({ src: img, alt: '商品写真' })));
-    window.location.hash = 'shop-gallery';
+    window.history.pushState({ shopLightbox: true }, '');
     setLightboxIndex(0);
   };
 
   const closeProductLightbox = () => {
-    if (window.location.hash === '#shop-gallery') {
+    if (window.history.state && window.history.state.shopLightbox) {
       window.history.back();
     }
     setLightboxIndex(-1);

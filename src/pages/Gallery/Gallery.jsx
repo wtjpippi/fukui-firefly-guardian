@@ -13,8 +13,8 @@ export default function Gallery() {
 
   // 戻るボタンなどの履歴操作を検知してLightboxを閉じる
   useEffect(() => {
-    const handlePopState = () => {
-      if (window.location.hash !== '#gallery') {
+    const handlePopState = (event) => {
+      if (!event.state || !event.state.lightbox) {
         setIndex(-1);
       }
     };
@@ -26,12 +26,12 @@ export default function Gallery() {
 
   const openLightbox = (images, photoIndex) => {
     setCurrentImages(images.map(img => ({ src: img.url, alt: img.alt || 'ほたるまつり写真', title: img.title || '' })));
-    window.location.hash = 'gallery';
+    window.history.pushState({ lightbox: true }, '');
     setIndex(photoIndex);
   };
 
   const closeLightbox = () => {
-    if (window.location.hash === '#gallery') {
+    if (window.history.state && window.history.state.lightbox) {
       window.history.back();
     }
     setIndex(-1);

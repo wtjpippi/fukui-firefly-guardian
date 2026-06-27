@@ -22,8 +22,8 @@ export default function Header() {
 
   // 戻るボタンなどの履歴操作を検知してメニューを閉じる
   useEffect(() => {
-    const handlePopState = () => {
-      if (window.location.hash !== '#menu') {
+    const handlePopState = (event) => {
+      if (!event.state || !event.state.menu) {
         setMenuOpen(false);
       }
     };
@@ -35,10 +35,10 @@ export default function Header() {
 
   const toggleMenu = (open) => {
     if (open) {
-      window.location.hash = 'menu';
+      window.history.pushState({ menu: true }, '');
       setMenuOpen(true);
     } else {
-      if (window.location.hash === '#menu') {
+      if (window.history.state && window.history.state.menu) {
         window.history.back();
       }
       setMenuOpen(false);
