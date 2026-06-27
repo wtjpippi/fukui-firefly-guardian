@@ -198,3 +198,93 @@
 .mt-sm {
   margin-top: var(--space-xs);
 }
+
+/* === 店舗カードデザイン刷新 (ヘッダー画像＆商品ボタン) === */
+.shop-card {
+  padding: 0 !important; /* ヘッダー画像をカード一杯に広げるためにパディングをリセット */
+  overflow: hidden;
+}
+
+.shop-card-body-content {
+  padding: var(--space-xl);
+  display: flex;
+  flex-direction: column;
+  flex-grow: 1;
+}
+
+.shop-card-image-wrapper {
+  width: 100%;
+  aspect-ratio: 16/9;
+  overflow: hidden;
+  background: rgba(0, 0, 0, 0.2);
+  border-bottom: 1px solid var(--color-border);
+  position: relative;
+}
+
+.shop-card-image {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  transition: transform var(--transition-slow);
+}
+
+.shop-card:hover .shop-card-image {
+  transform: scale(1.05);
+}
+
+.shop-card-no-image {
+  width: 100%;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: var(--space-xs);
+  color: var(--color-text-muted);
+  font-size: var(--text-xs);
+  font-weight: 600;
+  letter-spacing: 0.05em;
+  background: rgba(255, 255, 255, 0.01);
+}
+
+.shop-card-no-image .placeholder-icon {
+  opacity: 0.4;
+  color: var(--color-text-muted);
+}
+
+.product-btn-container {
+  margin-top: var(--space-md);
+  margin-bottom: var(--space-md);
+}
+
+.product-btn {
+  width: 100%;
+  background: rgba(200, 230, 78, 0.08);
+  color: var(--color-firefly);
+  border: 1px solid rgba(200, 230, 78, 0.3);
+  padding: 8px 16px;
+  border-radius: var(--radius-md);
+  font-size: var(--text-xs);
+  font-weight: 700;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--space-xs);
+  transition: all var(--transition-fast);
+}
+
+.product-btn:not(.disabled):hover {
+  background: var(--color-firefly);
+  color: var(--color-bg-primary);
+  border-color: var(--color-firefly);
+  box-shadow: 0 0 10px rgba(200, 230, 78, 0.3);
+}
+
+.product-btn.disabled {
+  background: rgba(255, 255, 255, 0.02);
+  color: var(--color-text-muted);
+  border-color: rgba(255, 255, 255, 0.05);
+  cursor: not-allowed;
+  opacity: 0.6;
+}

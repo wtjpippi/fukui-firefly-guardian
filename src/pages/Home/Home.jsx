@@ -46,6 +46,26 @@ export default function Home() {
           </p>
         </div>
 
+        {/* 新着情報・お知らせ */}
+        <div className="news-section-hero">
+          <div className="glass-card news-card">
+            <h3 className="news-title">
+              <span className="news-icon">📢</span>新着情報・お知らせ
+            </h3>
+            <div className="news-list">
+              <div className="news-item">
+                <div className="news-meta">
+                  <span className="news-date">2026.06.27</span>
+                  <span className="news-badge">お知らせ</span>
+                </div>
+                <p className="news-content">
+                  <Link to="/gallery">「第32回 福井ほたる祭り」のギャラリー</Link>を公開しました！お祭り当日の様子や活動風景を写真でご覧いただけます。
+                </p>
+              </div>
+            </div>
+          </div>
+        </div>
+
         {/* Reservation (Moved from Events) */}
         <div className="reservation-section" id="reservation">
           <div className="glass-card reservation-card">

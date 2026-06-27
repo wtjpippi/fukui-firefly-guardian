@@ -1,7 +1,19 @@
+import { useState } from 'react';
+import Lightbox from 'yet-another-react-lightbox';
+import 'yet-another-react-lightbox/styles.css';
 import './LocalGuide.css';
 import { Map, Store, Trees, Camera, Coffee, Instagram, ExternalLink, Building2, Wheat, Bath, Target, Landmark, HelpCircle } from 'lucide-react';
 
 export default function LocalGuide() {
+  const [lightboxIndex, setLightboxIndex] = useState(-1);
+  const [lightboxImages, setLightboxImages] = useState([]);
+  const [imageErrors, setImageErrors] = useState({}); // 画像読み込みエラー検知用
+
+  const openProductLightbox = (images) => {
+    setLightboxImages(images.map(img => ({ src: img, alt: '商品写真' })));
+    setLightboxIndex(0);
+  };
+
   const shops = [
     {
       id: 'ameya',
@@ -9,6 +21,12 @@ export default function LocalGuide() {
       icon: <Store size={20} />,
       description: '1817年（文化14年）創業、良寛（りょうかん）さまが名付け親と伝えられる歴史ある菓子店。「福ほたる饅頭」は、ほたる観賞のお土産として長く愛されています。',
       tags: ['1817年創業', '福ほたる饅頭'],
+      headerImage: '/images/shops/ameya/header.jpg',
+      productImages: [
+        '/images/shops/ameya/products/1.jpg',
+        '/images/shops/ameya/products/2.jpg',
+        '/images/shops/ameya/products/3.jpg'
+      ],
     },
     {
       id: 'honmaya',
@@ -16,7 +34,24 @@ export default function LocalGuide() {
       icon: <Coffee size={20} />,
       description: '江戸時代から 180 年続く柚餅子（ゆべし）の専門店。時の長岡藩主や 14 代将軍・徳川家茂にも献上された、唯一無二の伝統の味を守り続けています。',
       tags: ['将軍家献上', '柚餅子'],
-      instagram: 'https://www.instagram.com/honmaya1845/?hl=ja'
+      instagram: 'https://www.instagram.com/honmaya1845/?hl=ja',
+      headerImage: '/images/shops/honmaya/header.jpg',
+      productImages: [
+        '/images/shops/honmaya/products/1.jpg'
+      ],
+    },
+    {
+      id: 'honmatatami',
+      title: '本間畳店',
+      icon: <Store size={20} />,
+      description: '地元に根ざし、丁寧な手仕事で日本の伝統である畳造りを守り続けています。畳の表替えや新調など、お客様の和の暮らしに寄り添った施工をお届けします。',
+      tags: ['畳専門店', '丁寧な手仕事'],
+      headerImage: '/images/shops/honmatatami/header.jpg',
+      productImages: [
+        '/images/shops/honmatatami/products/1.jpg',
+        '/images/shops/honmatatami/products/2.jpg',
+        '/images/shops/honmatatami/products/3.jpg'
+      ],
     }
   ];
 
@@ -53,7 +88,7 @@ export default function LocalGuide() {
       id: 'shooting',
       title: '巻射撃場',
       icon: <Target size={20} />,
-      description: '日本クレー射撃協会A級公認のトラップ射面2面とスキート射面2面を備える射撃場。日本一美しい射撃場造りを目指し、快適な射撃空間を提供しています。',
+      description: '日本クレー射撃協会A級公認 of トラップ射面2面とスキート射面2面を備える射撃場。日本一美しい射撃場造りを目指し、快適な射撃空間を提供しています。',
       link: 'https://makishagekijou.opal.ne.jp/'
     },
     {
@@ -77,7 +112,6 @@ export default function LocalGuide() {
       link: 'https://minenohakubai.com/'
     }
   ];
-
 
   return (
     <div className="page local-guide-page">
@@ -105,30 +139,71 @@ export default function LocalGuide() {
           <section className="guide-section">
             <h3 className="sub-title">🏠 地元のお店</h3>
             <div className="shops-grid">
-              {shops.map(shop => (
-                <div key={shop.id} className="guide-card shop-card glass-card">
-                  <div className="guide-card-header">
-                    <div className="guide-icon-box">{shop.icon}</div>
-                    <h3>{shop.title}</h3>
+              {shops.map(shop => {
+                const headerErrorKey = `${shop.id}-header`;
+                const hasHeaderImage = !!shop.headerImage && !imageErrors[headerErrorKey];
+                return (
+                  <div key={shop.id} className="guide-card shop-card glass-card">
+                    {/* ヘッダー画像エリア */}
+                    <div className="shop-card-image-wrapper">
+                      {hasHeaderImage ? (
+                        <img 
+                          src={shop.headerImage} 
+                          alt={shop.title} 
+                          className="shop-card-image" 
+                          onError={() => setImageErrors(prev => ({ ...prev, [headerErrorKey]: true }))}
+                        />
+                      ) : (
+                        <div className="shop-card-no-image">
+                          <Camera size={22} className="placeholder-icon" />
+                          <span>店舗写真 準備中</span>
+                        </div>
+                      )}
+                    </div>
+
+                    <div className="shop-card-body-content">
+                      <div className="guide-card-header">
+                        <div className="guide-icon-box">{shop.icon}</div>
+                        <h3>{shop.title}</h3>
+                      </div>
+                      <p className="guide-text">{shop.description}</p>
+                      
+                      <div className="guide-tags">
+                        {shop.tags.map(tag => <span key={tag} className="tag">#{tag}</span>)}
+                      </div>
+
+                      {/* 商品写真閲覧ボタン */}
+                      <div className="product-btn-container">
+                        {shop.productImages && shop.productImages.length > 0 ? (
+                          <button 
+                            className="btn-glow product-btn" 
+                            onClick={() => openProductLightbox(shop.productImages)}
+                          >
+                            📸 写真で見る (計{shop.productImages.length}枚)
+                          </button>
+                        ) : (
+                          <button className="product-btn disabled" disabled>
+                            📸 写真 準備中
+                          </button>
+                        )}
+                      </div>
+
+                      <div className="card-links">
+                        {shop.instagram && (
+                          <a href={shop.instagram} target="_blank" rel="noopener noreferrer" className="card-link">
+                            <Instagram size={14} /> Instagram
+                          </a>
+                        )}
+                        {shop.link && (
+                          <a href={shop.link} target="_blank" rel="noopener noreferrer" className="card-link">
+                            <ExternalLink size={14} /> 公式サイト
+                          </a>
+                        )}
+                      </div>
+                    </div>
                   </div>
-                  <p className="guide-text">{shop.description}</p>
-                  <div className="guide-tags">
-                    {shop.tags.map(tag => <span key={tag} className="tag">#{tag}</span>)}
-                  </div>
-                  <div className="card-links">
-                    {shop.instagram && (
-                      <a href={shop.instagram} target="_blank" rel="noopener noreferrer" className="card-link">
-                        <Instagram size={14} /> Instagram
-                      </a>
-                    )}
-                    {shop.link && (
-                      <a href={shop.link} target="_blank" rel="noopener noreferrer" className="card-link">
-                        <ExternalLink size={14} /> 公式サイト
-                      </a>
-                    )}
-                  </div>
-                </div>
-              ))}
+                );
+              })}
             </div>
           </section>
 
@@ -176,7 +251,6 @@ export default function LocalGuide() {
             </div>
           </section>
 
-
           {/* Sponsors Section */}
           <section className="guide-section">
             <h3 className="sub-title">🤝 スポンサー</h3>
@@ -188,6 +262,13 @@ export default function LocalGuide() {
           </section>
         </div>
       </div>
+
+      <Lightbox
+        index={lightboxIndex}
+        open={lightboxIndex >= 0}
+        close={() => setLightboxIndex(-1)}
+        slides={lightboxImages}
+      />
     </div>
   );
 }

@@ -652,3 +652,111 @@
     font-size: var(--text-xs);
   }
 }
+
+/* === 新着情報・お知らせセクション === */
+.news-section-hero {
+  position: relative;
+  z-index: 3;
+  width: 100%;
+  max-width: 360px;
+  margin: 0 auto var(--space-lg);
+  text-align: left;
+}
+
+.news-card {
+  padding: var(--space-lg);
+  background: rgba(15, 38, 20, 0.6);
+  backdrop-filter: blur(12px);
+  border: 1px solid rgba(200, 230, 78, 0.2);
+  box-shadow: 0 10px 40px rgba(0, 0, 0, 0.4);
+}
+
+.news-title {
+  display: flex;
+  align-items: center;
+  gap: var(--space-sm);
+  font-family: var(--font-display);
+  font-size: var(--text-base);
+  color: var(--color-firefly);
+  margin-bottom: var(--space-md);
+  border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+  padding-bottom: var(--space-xs);
+  text-shadow: 0 0 10px rgba(200, 230, 78, 0.3);
+}
+
+.news-icon {
+  font-size: 1.1rem;
+}
+
+.news-list {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-md);
+}
+
+.news-item {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-xs);
+  padding-bottom: var(--space-xs);
+}
+
+.news-meta {
+  display: flex;
+  align-items: center;
+  gap: var(--space-sm);
+}
+
+.news-date {
+  font-size: var(--text-xs);
+  color: var(--color-text-secondary);
+  font-weight: 600;
+  letter-spacing: 0.05em;
+}
+
+.news-badge {
+  background: var(--color-firefly);
+  color: var(--color-bg-primary);
+  font-size: 10px;
+  font-weight: 800;
+  padding: 2px 8px;
+  border-radius: var(--radius-sm);
+  letter-spacing: 0.05em;
+}
+
+.news-content {
+  font-size: var(--text-sm);
+  color: var(--color-text-secondary);
+  line-height: 1.6;
+  margin: 0;
+}
+
+.news-content a {
+  color: #fff;
+  text-decoration: underline;
+  font-weight: 600;
+  transition: color var(--transition-fast);
+}
+
+.news-content a:hover {
+  color: var(--color-firefly);
+}
+
+/* タブレット・PC環境での横並び対応 */
+@media (min-width: 768px) {
+  .news-section-hero {
+    max-width: 900px;
+    width: 100%;
+  }
+
+  .news-item {
+    flex-direction: row;
+    align-items: flex-start;
+    gap: var(--space-xl);
+  }
+  
+  .news-meta {
+    flex-shrink: 0;
+    width: 140px; /* 日付・バッジの領域幅 */
+  }
+}
