@@ -127,8 +127,16 @@ export default function Gallery() {
 
               {/* カテゴリー選択タブ */}
               <div className="category-tabs-container">
+                <div className="category-tabs-all-row">
+                  <button
+                    className={`tab-button all-button ${activeCategory === 'all' ? 'active' : ''}`}
+                    onClick={() => setActiveCategory('all')}
+                  >
+                    🌟 すべて表示
+                  </button>
+                </div>
                 <div className="category-tabs">
-                  {festival2026Categories.map(cat => (
+                  {festival2026Categories.filter(cat => cat.id !== 'all').map(cat => (
                     <button
                       key={cat.id}
                       className={`tab-button ${activeCategory === cat.id ? 'active' : ''}`}
