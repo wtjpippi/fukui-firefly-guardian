@@ -126,17 +126,19 @@ export default function Gallery() {
               </div>
 
               {/* カテゴリー選択タブ */}
-              <div className="category-tabs-container">
-                <div className="category-tabs">
-                  {festival2026Categories.map(cat => (
-                    <button
-                      key={cat.id}
-                      className={`tab-button ${activeCategory === cat.id ? 'active' : ''}`}
-                      onClick={() => setActiveCategory(cat.id)}
-                    >
-                      {cat.id === 'all' ? `🌟 ${cat.label}` : cat.label}
-                    </button>
-                  ))}
+              <div className="category-tabs-wrapper">
+                <div className="category-tabs-container">
+                  <div className="category-tabs">
+                    {festival2026Categories.map(cat => (
+                      <button
+                        key={cat.id}
+                        className={`tab-button ${activeCategory === cat.id ? 'active' : ''}`}
+                        onClick={() => setActiveCategory(cat.id)}
+                      >
+                        {cat.id === 'all' ? `🌟 ${cat.label}` : cat.label}
+                      </button>
+                    ))}
+                  </div>
                 </div>
               </div>
 

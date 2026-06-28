@@ -191,26 +191,29 @@
 }
 
 /* 2026年特設タブUI用スタイル */
-.category-tabs-container {
+.category-tabs-wrapper {
   position: relative; /* フェードグラデーションの配置基準 */
   margin-bottom: var(--space-xl);
   border-bottom: 1px solid var(--color-border);
-  padding-bottom: var(--space-md);
-  overflow-x: auto; /* 横スクロールを許可 */
-  -webkit-overflow-scrolling: touch; /* iOSでの慣性スクロールを有効化 */
 }
 
-/* スマホ用: 右端にスクロールを促すグラデーションフェードを表示 */
-.category-tabs-container::after {
+/* スマホ用: 親ラッパーの右端に固定のグラデーションフェードを表示 */
+.category-tabs-wrapper::after {
   content: '';
   position: absolute;
   top: 0;
   right: 0;
-  bottom: var(--space-md); /* 下の枠線パディングを除いた高さにフィット */
-  width: 50px; /* フェード幅 */
+  bottom: 0; /* 下の枠線を含む全体にフィット */
+  width: 60px; /* フェード幅 */
   background: linear-gradient(to right, rgba(10, 25, 15, 0), rgba(10, 25, 15, 1)); /* ダークグリーン背景へフェードアウト */
   pointer-events: none; /* 下のボタンがクリックできるように透過 */
   z-index: 2;
+}
+
+.category-tabs-container {
+  padding-bottom: var(--space-md);
+  overflow-x: auto; /* 横スクロールを許可 */
+  -webkit-overflow-scrolling: touch; /* iOSでの慣性スクロールを有効化 */
 }
 
 /* スクロールバーの非表示（見た目をすっきりさせるため） */
@@ -434,7 +437,7 @@
   .category-tabs-container {
     overflow-x: visible;
   }
-  .category-tabs-container::after {
+  .category-tabs-wrapper::after {
     display: none; /* 大画面ではグラデーションフェードを非表示 */
   }
   .category-tabs {
