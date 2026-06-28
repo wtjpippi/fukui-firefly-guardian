@@ -6,6 +6,12 @@ import { eventInfo } from '../../config/eventInfo';
 import './Home.css';
 
 export default function Home() {
+  // === 【来年以降のON/OFF用設定フラグ】 ===
+  // ほたる観賞会：終了時は true、受付中は false にするだけで一括切り替え
+  const IS_TOUR_FINISHED = true;
+  // ほたる祭り：終了時は true、開催前・当日は false にするだけで一括切り替え
+  const IS_FESTIVAL_FINISHED = true;
+
   const [latestReports, setLatestReports] = useState([]);
   const [showPeriodHelp, setShowPeriodHelp] = useState(false);
   const [viewingInfo, setViewingInfo] = useState({
@@ -176,25 +182,43 @@ export default function Home() {
           <div className="glass-card reservation-card">
             <div className="reservation-card-content">
               <div className="reservation-card-left">
-                <div className="hero-event-label">{eventInfo.year}年度（終了）</div>
+                <div className="hero-event-label">
+                  {eventInfo.year}年度{IS_TOUR_FINISHED ? '（終了）' : ' 開催情報'}
+                </div>
                 <h2 className="reservation-card-title">ガイド付きほたる観賞会</h2>
-                <div className="reservation-status finished">🔴 今年度の開催は終了しました</div>
+                <div className={`reservation-status ${IS_TOUR_FINISHED ? 'finished' : ''}`}>
+                  {IS_TOUR_FINISHED ? '🔴 今年度の開催は終了しました' : '🔦 予約受付中'}
+                </div>
                 <div className="reservation-dates">
                   {eventInfo.viewingDates.map((date, i) => (
-                    <span key={i} className="reservation-date-chip finished">{date}</span>
+                    <span key={i} className={`reservation-date-chip ${IS_TOUR_FINISHED ? 'finished' : ''}`}>
+                      {date}
+                    </span>
                   ))}
                 </div>
               </div>
               <div className="reservation-card-right">
-                <div className="reservation-info" style={{ marginBottom: 'var(--space-md)' }}>
+                <div className="reservation-info" style={{ marginBottom: IS_TOUR_FINISHED ? 'var(--space-md)' : '0' }}>
                   場所: ほたるの里公園 ほたる案内所<br />
                   集合: 19:30 ／ 終了: 20:45<br />
                   参加費: 無料 ／ 定員: 各日20名<br />
                   地元ガイドがほたるの生態を解説しながらご案内します
                 </div>
-                <p className="reservation-finished-text">
-                  今年度のガイド付き観賞会はすべて日程を終了いたしました。ご参加いただいた皆様、誠にありがとうございました。また来年のご参加を心よりお待ちしております。
-                </p>
+                {IS_TOUR_FINISHED ? (
+                  <p className="reservation-finished-text">
+                    今年度のガイド付き観賞会はすべて日程を終了いたしました。ご参加いただいた皆様、誠にありがとうございました。また来年のご参加を心よりお待ちしております。
+                  </p>
+                ) : (
+                  <a
+                    href="https://docs.google.com/forms/d/e/1FAIpQLSfuBonebE4miSo-8r2O-W86cZVpqo7rWJ1WfJTdGLRQFdPDbA/viewform"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="btn-glow"
+                  >
+                    <ExternalLink size={16} />
+                    Googleフォームで予約する
+                  </a>
+                )}
               </div>
             </div>
           </div>
@@ -202,7 +226,9 @@ export default function Home() {
 
         <div className="hero-event-card glass-card">
           <div className="hero-event-info-group">
-            <div className="hero-event-label">🏮 今年度の開催は終了しました</div>
+            <div className="hero-event-label">
+              {IS_FESTIVAL_FINISHED ? '🏮 今年度の開催は終了しました' : `${eventInfo.year}年度 開催情報`}
+            </div>
             <h2 className="hero-event-title">第{eventInfo.festivalEdition}回 福井ほたる祭り</h2>
             <div className="hero-event-date">
               <Calendar size={14} />
@@ -210,15 +236,17 @@ export default function Home() {
             </div>
           </div>
 
-          <div className="event-finished-message-container">
-            <p className="event-finished-text">
-              第{eventInfo.festivalEdition}回 福井ほたる祭りはおかげさまで大盛況のうちに終了いたしました。ご来場いただいた皆様、誠にありがとうございました。
-            </p>
-          </div>
+          {IS_FESTIVAL_FINISHED && (
+            <div className="event-finished-message-container">
+              <p className="event-finished-text">
+                第{eventInfo.festivalEdition}回 福井ほたる祭りはおかげさまで大盛況のうちに終了いたしました。ご来場いただいた皆様、誠にありがとうございました。
+              </p>
+            </div>
+          )}
 
           <div className="event-cta">
             <Link to="/events" className="btn-glow">
-              当日のスケジュール・詳細はこちら
+              {IS_FESTIVAL_FINISHED ? '当日のスケジュール・詳細はこちら' : '当日のスケジュールはこちら'}
               <ArrowRight size={16} />
             </Link>
           </div>
