@@ -6,9 +6,17 @@ import './Footer.css';
 export default function Footer() {
   const [copied, setCopied] = useState(false);
   const [showQr, setShowQr] = useState(false);
+  const [isShareSupported, setIsShareSupported] = useState(false);
   const location = useLocation();
   const siteUrl = window.location.origin;
   const siteTitle = "福井ほたる祭り | 新潟市西蒲区";
+
+  // ブラウザがスマホ用の標準共有（Web Share API）に対応しているか判定
+  useEffect(() => {
+    if (typeof navigator !== 'undefined' && navigator.share) {
+      setIsShareSupported(true);
+    }
+  }, []);
 
   const shareLinks = {
     x: `https://twitter.com/intent/tweet?url=${encodeURIComponent(siteUrl)}&text=${encodeURIComponent(siteTitle)}`,
@@ -24,6 +32,22 @@ export default function Footer() {
       setTimeout(() => setCopied(false), 2000);
     } catch (err) {
       console.error('Failed to copy: ', err);
+    }
+  };
+
+  const handleWebShare = async () => {
+    if (navigator.share) {
+      try {
+        await navigator.share({
+          title: siteTitle,
+          text: '新潟市西蒲区福井のほたる祭り・ほたる保護活動公式サイト',
+          url: siteUrl,
+        });
+      } catch (err) {
+        if (err.name !== 'AbortError') {
+          console.error('Share failed:', err);
+        }
+      }
     }
   };
 
@@ -51,15 +75,26 @@ export default function Footer() {
               <Share2 size={16} /> サイトをシェアする
             </span>
             <div className="footer-sns-buttons">
-              <a href={shareLinks.x} target="_blank" rel="noopener noreferrer" className="sns-btn x" title="Xでシェア">
-                <Twitter size={18} />
-              </a>
-              <a href={shareLinks.facebook} target="_blank" rel="noopener noreferrer" className="sns-btn facebook" title="Facebookでシェア">
-                <Facebook size={18} />
-              </a>
-              <a href={shareLinks.line} target="_blank" rel="noopener noreferrer" className="sns-btn line" title="LINEでシェア">
-                <MessageCircle size={18} />
-              </a>
+              {isShareSupported ? (
+                // スマートフォン（Web Share API 対応）用の共有ボタン
+                <button onClick={handleWebShare} className="share-all-btn" title="ページをシェア">
+                  <Share2 size={16} /> シェアする
+                </button>
+              ) : (
+                // パソコン用の個別SNSシェアボタン
+                <>
+                  <a href={shareLinks.x} target="_blank" rel="noopener noreferrer" className="sns-btn x" title="Xでシェア">
+                    <Twitter size={18} />
+                  </a>
+                  <a href={shareLinks.facebook} target="_blank" rel="noopener noreferrer" className="sns-btn facebook" title="Facebookでシェア">
+                    <Facebook size={18} />
+                  </a>
+                  <a href={shareLinks.line} target="_blank" rel="noopener noreferrer" className="sns-btn line" title="LINEでシェア">
+                    <MessageCircle size={18} />
+                  </a>
+                </>
+              )}
+              {/* コピー・QRコード・Instagramは便利なのでスマホでも並んで表示 */}
               <a href={shareLinks.instagram} target="_blank" rel="noopener noreferrer" className="sns-btn instagram" title="Instagram（タグ検索）">
                 <Instagram size={18} />
               </a>
