@@ -930,11 +930,12 @@
 .course-tag {
   font-size: var(--text-xs);
   font-weight: 700;
-  color: var(--color-bg-primary);
-  background: var(--color-firefly);
+  color: var(--color-firefly); /* 文字色をほたるカラーに */
+  background: rgba(200, 230, 78, 0.06); /* 薄い半透明背景 */
+  border: 1px solid rgba(200, 230, 78, 0.3); /* 細い枠線 */
   padding: 4px 14px; /* 左右を広げてカプセル形状に適合 */
   border-radius: var(--radius-full); /* マップボタンに合わせた楕円形(カプセル型)に変更 */
-  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
+  box-shadow: none; /* 影を無くして「ボタンではない」ことを示す */
 }
 
 .course-tag.disabled {
@@ -1039,6 +1040,6 @@
 
   .map-btn-link {
     width: auto;
-    padding: 0 var(--space-xl);
+    padding: var(--space-sm) var(--space-xl); /* 縦パディングの潰れを修復 */
   }
 }
