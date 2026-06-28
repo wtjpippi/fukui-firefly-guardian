@@ -715,12 +715,13 @@
 }
 
 .news-badge {
-  background: var(--color-firefly);
-  color: var(--color-bg-primary);
+  background: rgba(200, 230, 78, 0.06);
+  border: 1px solid rgba(200, 230, 78, 0.3);
+  color: var(--color-firefly);
   font-size: 10px;
-  font-weight: 800;
-  padding: 2px 8px;
-  border-radius: var(--radius-sm);
+  font-weight: 700;
+  padding: 2px 10px; /* 左右を広げてカプセル形状に適合 */
+  border-radius: var(--radius-full); /* マップボタン等に合わせた楕円形(カプセル型)に変更 */
   letter-spacing: 0.05em;
 }
 
