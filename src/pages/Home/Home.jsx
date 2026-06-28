@@ -176,31 +176,25 @@ export default function Home() {
           <div className="glass-card reservation-card">
             <div className="reservation-card-content">
               <div className="reservation-card-left">
-                <div className="hero-event-label">{eventInfo.year}年度 開催情報</div>
+                <div className="hero-event-label">{eventInfo.year}年度（終了）</div>
                 <h2 className="reservation-card-title">ガイド付きほたる観賞会</h2>
-                <div className="reservation-status">🔦 予約受付中</div>
+                <div className="reservation-status finished">🔴 今年度の開催は終了しました</div>
                 <div className="reservation-dates">
                   {eventInfo.viewingDates.map((date, i) => (
-                    <span key={i} className="reservation-date-chip">{date}</span>
+                    <span key={i} className="reservation-date-chip finished">{date}</span>
                   ))}
                 </div>
               </div>
               <div className="reservation-card-right">
-                <div className="reservation-info">
+                <div className="reservation-info" style={{ marginBottom: 'var(--space-md)' }}>
                   場所: ほたるの里公園 ほたる案内所<br />
                   集合: 19:30 ／ 終了: 20:45<br />
                   参加費: 無料 ／ 定員: 各日20名<br />
                   地元ガイドがほたるの生態を解説しながらご案内します
                 </div>
-                <a
-                  href="https://docs.google.com/forms/d/e/1FAIpQLSfuBonebE4miSo-8r2O-W86cZVpqo7rWJ1WfJTdGLRQFdPDbA/viewform"
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="btn-glow"
-                >
-                  <ExternalLink size={16} />
-                  Googleフォームで予約する
-                </a>
+                <p className="reservation-finished-text">
+                  今年度のガイド付き観賞会はすべて日程を終了いたしました。ご参加いただいた皆様、誠にありがとうございました。また来年のご参加を心よりお待ちしております。
+                </p>
               </div>
             </div>
           </div>
@@ -208,7 +202,7 @@ export default function Home() {
 
         <div className="hero-event-card glass-card">
           <div className="hero-event-info-group">
-            <div className="hero-event-label">{eventInfo.year}年度 開催情報</div>
+            <div className="hero-event-label">🏮 今年度の開催は終了しました</div>
             <h2 className="hero-event-title">第{eventInfo.festivalEdition}回 福井ほたる祭り</h2>
             <div className="hero-event-date">
               <Calendar size={14} />
@@ -216,9 +210,15 @@ export default function Home() {
             </div>
           </div>
 
+          <div className="event-finished-message-container">
+            <p className="event-finished-text">
+              第{eventInfo.festivalEdition}回 福井ほたる祭りはおかげさまで大盛況のうちに終了いたしました。ご来場いただいた皆様、誠にありがとうございました。
+            </p>
+          </div>
+
           <div className="event-cta">
             <Link to="/events" className="btn-glow">
-              当日のスケジュールはこちら
+              当日のスケジュール・詳細はこちら
               <ArrowRight size={16} />
             </Link>
           </div>

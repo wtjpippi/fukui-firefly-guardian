@@ -1051,3 +1051,43 @@
     padding: var(--space-sm) var(--space-xl); /* 縦パディングの潰れを修復 */
   }
 }
+
+/* === イベント終了時の表示調整スタイル === */
+.reservation-status.finished {
+  color: var(--color-text-muted);
+}
+
+.reservation-date-chip.finished {
+  background: rgba(255, 255, 255, 0.05) !important;
+  border-color: rgba(255, 255, 255, 0.08) !important;
+  color: var(--color-text-muted) !important;
+  opacity: 0.6;
+}
+
+.reservation-finished-text {
+  font-size: var(--text-sm);
+  color: var(--color-text-secondary);
+  line-height: 1.6;
+  background: rgba(255, 255, 255, 0.02);
+  border: 1px solid rgba(255, 255, 255, 0.05);
+  padding: var(--space-md);
+  border-radius: var(--radius-md);
+  margin: 0;
+  text-align: left;
+}
+
+.event-finished-message-container {
+  margin: var(--space-md) 0;
+  padding: var(--space-md);
+  background: rgba(255, 255, 255, 0.02);
+  border: 1px dashed rgba(255, 255, 255, 0.1);
+  border-radius: var(--radius-md);
+}
+
+.event-finished-text {
+  font-size: var(--text-sm);
+  color: var(--color-text-secondary);
+  line-height: 1.6;
+  margin: 0;
+  text-align: center;
+}
