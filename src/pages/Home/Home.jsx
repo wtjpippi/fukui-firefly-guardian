@@ -101,7 +101,7 @@ export default function Home() {
                 <span className="viewing-info-icon">✨</span>最新のほたる観賞情報
               </h3>
               <span className="viewing-info-date">
-                {viewingInfo.updated_at ? `${viewingInfo.updated_at.split('T')[0].replace(/-/g, '.')} 更新` : ''}
+                最終更新: {viewingInfo.updated_at ? viewingInfo.updated_at.split('T')[0].replace(/-/g, '.') : ''}
               </span>
             </div>
             
