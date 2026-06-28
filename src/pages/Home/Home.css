@@ -345,6 +345,12 @@
   white-space: nowrap;
 }
 
+.event-cta {
+  display: flex;
+  justify-content: center;
+  margin-top: var(--space-md);
+}
+
 .hero-secondary-link {
   font-size: var(--text-sm);
   color: var(--color-text-secondary);
@@ -723,6 +729,7 @@
   padding: 2px 10px; /* 左右を広げてカプセル形状に適合 */
   border-radius: var(--radius-full); /* マップボタン等に合わせた楕円形(カプセル型)に変更 */
   letter-spacing: 0.05em;
+  white-space: nowrap; /* PC版等で絶対に改行させない */
 }
 
 .news-content {
@@ -758,7 +765,7 @@
   
   .news-meta {
     flex-shrink: 0;
-    width: 140px; /* 日付・バッジの領域幅 */
+    width: 165px; /* 日付・バッジの領域幅を広げて改行を防ぐ */
   }
 }
 

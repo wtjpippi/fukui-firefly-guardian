@@ -216,7 +216,7 @@ export default function Home() {
             </div>
           </div>
 
-          <div className="hero-cta">
+          <div className="event-cta">
             <Link to="/events" className="btn-glow">
               当日のスケジュールはこちら
               <ArrowRight size={16} />
