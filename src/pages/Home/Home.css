@@ -760,3 +760,202 @@
     width: 140px; /* 日付・バッジの領域幅 */
   }
 }
+
+/* --- 最新のほたる観賞情報カード --- */
+.viewing-info-hero {
+  position: relative;
+  z-index: 3;
+  width: 100%;
+  max-width: 360px;
+  margin: 0 auto var(--space-xl);
+}
+
+.viewing-info-card {
+  padding: var(--space-xl) var(--space-md);
+  background: rgba(15, 38, 20, 0.6);
+  backdrop-filter: blur(12px);
+  border: 1px solid rgba(200, 230, 78, 0.2);
+  border-radius: var(--radius-lg);
+  box-shadow: 0 10px 40px rgba(0, 0, 0, 0.4);
+}
+
+.viewing-info-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: var(--space-lg);
+  border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+  padding-bottom: var(--space-sm);
+}
+
+.viewing-info-title {
+  font-family: var(--font-display);
+  font-size: 1.25rem;
+  font-weight: 700;
+  color: #fff;
+  display: flex;
+  align-items: center;
+  gap: var(--space-xs);
+}
+
+.viewing-info-icon {
+  animation: pulse-glow 2s infinite ease-in-out;
+}
+
+@keyframes pulse-glow {
+  0%, 100% { opacity: 0.8; transform: scale(1); }
+  50% { opacity: 1; transform: scale(1.1); }
+}
+
+.viewing-info-date {
+  font-size: var(--text-xs);
+  color: var(--color-text-muted);
+  background: rgba(255, 255, 255, 0.05);
+  padding: 2px 8px;
+  border-radius: var(--radius-sm);
+}
+
+.viewing-info-body {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-md);
+  text-align: left;
+}
+
+.viewing-info-item {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-xs);
+}
+
+.viewing-info-label {
+  font-size: var(--text-xs);
+  font-weight: 700;
+  color: var(--color-firefly);
+  letter-spacing: 0.05em;
+}
+
+.viewing-info-val {
+  font-size: var(--text-sm);
+  font-weight: 700;
+  color: #fff;
+}
+
+.viewing-info-assist {
+  font-size: 11px;
+  color: var(--color-text-muted);
+  line-height: 1.4;
+  margin-top: 2px;
+}
+
+/* おすすめコースのタグ */
+.recommended-courses-tags {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-xs);
+  margin-top: 2px;
+}
+
+.course-tag {
+  font-size: var(--text-xs);
+  font-weight: 700;
+  color: var(--color-bg-primary);
+  background: var(--color-firefly);
+  padding: 4px 12px;
+  border-radius: var(--radius-sm);
+  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
+}
+
+.course-tag.disabled {
+  background: rgba(255, 255, 255, 0.1);
+  color: var(--color-text-muted);
+  box-shadow: none;
+}
+
+/* 一言コメント */
+.viewing-info-comment-box {
+  background: rgba(200, 230, 78, 0.05);
+  border-left: 3px solid var(--color-firefly);
+  padding: var(--space-sm);
+  border-radius: 0 var(--radius-sm) var(--radius-sm) 0;
+  margin-top: var(--space-xs);
+}
+
+.comment-label {
+  display: block;
+  font-size: 11px;
+  font-weight: 700;
+  color: var(--color-firefly);
+  margin-bottom: 4px;
+}
+
+.comment-text {
+  font-size: var(--text-sm);
+  color: var(--color-text-secondary);
+  line-height: 1.6;
+  margin: 0;
+}
+
+.viewing-info-divider {
+  height: 1px;
+  background: rgba(255, 255, 255, 0.08);
+  margin: var(--space-sm) 0;
+}
+
+.viewing-info-footer {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-sm);
+}
+
+.footer-assist-text {
+  font-size: var(--text-xs);
+  color: var(--color-text-muted);
+  line-height: 1.5;
+  margin: 0;
+}
+
+.map-btn-link {
+  width: 100%;
+}
+
+/* 横並び・大画面対応 */
+@media (min-width: 768px) {
+  .viewing-info-hero {
+    max-width: 900px;
+    width: 100%;
+  }
+
+  .viewing-info-card {
+    padding: var(--space-xl);
+  }
+
+  .viewing-info-body {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: var(--space-xl);
+  }
+
+  /* コメントとフッターは横断表示 */
+  .viewing-info-comment-box,
+  .viewing-info-divider,
+  .viewing-info-footer {
+    grid-column: span 2;
+  }
+
+  .viewing-info-footer {
+    flex-direction: row;
+    justify-content: space-between;
+    align-items: center;
+    gap: var(--space-xl);
+  }
+
+  .footer-assist-text {
+    max-width: 60%;
+  }
+
+  .map-btn-link {
+    width: auto;
+    padding: 0 var(--space-xl);
+  }
+}

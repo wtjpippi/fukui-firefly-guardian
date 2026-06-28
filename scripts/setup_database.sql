@@ -129,3 +129,24 @@ INSERT INTO course_routes (id, name, path, draft_path) VALUES
   ('genpei', '源平橋コース', NULL, NULL),
   ('kanhotaru', '蛍観橋コース', NULL, NULL)
 ON CONFLICT (id) DO NOTHING;
+
+-- ============================================
+-- ⑥ ほたる観賞・最新見頃情報テーブル (新規追加)
+-- ============================================
+CREATE TABLE viewing_info (
+  id TEXT PRIMARY KEY DEFAULT 'current',
+  viewing_period TEXT NOT NULL DEFAULT '6月上旬〜6月下旬頃',
+  time_range TEXT NOT NULL DEFAULT '20:00〜21:00頃',
+  recommended_courses JSONB NOT NULL DEFAULT '[]', -- コースIDの配列: ["kanhotaru", "yuhodo"]
+  comment TEXT,                                     -- 一言コメント
+  updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
+);
+
+ALTER TABLE viewing_info ENABLE ROW LEVEL SECURITY;
+CREATE POLICY "誰でも読み取り可" ON viewing_info FOR SELECT USING (true);
+CREATE POLICY "管理用書き込み" ON viewing_info FOR ALL USING (true) WITH CHECK (true);
+
+-- 初期データの登録
+INSERT INTO viewing_info (id, viewing_period, time_range, recommended_courses, comment)
+VALUES ('current', '6月上旬〜6月下旬頃', '20:00〜21:00頃', '["yuhodo"]', 'ほたる遊歩道エリアで多くの飛翔が見られます！')
+ON CONFLICT (id) DO NOTHING;

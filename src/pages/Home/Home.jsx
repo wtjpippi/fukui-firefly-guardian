@@ -7,6 +7,13 @@ import './Home.css';
 
 export default function Home() {
   const [latestReports, setLatestReports] = useState([]);
+  const [viewingInfo, setViewingInfo] = useState({
+    viewing_period: '6月上旬〜6月下旬頃',
+    time_range: '20:00〜21:00頃',
+    recommended_courses: ['yuhodo'],
+    comment: 'ほたる遊歩道エリアで多くの飛翔が見られます！',
+    updated_at: new Date().toISOString()
+  });
 
   useEffect(() => {
     async function fetchLatestReports() {
@@ -17,13 +24,33 @@ export default function Home() {
         .limit(3);
       if (data) setLatestReports(data);
     }
+    async function fetchViewingInfo() {
+      const { data } = await supabase
+        .from('viewing_info')
+        .select('*')
+        .eq('id', 'current')
+        .single();
+      if (data) setViewingInfo(data);
+    }
     fetchLatestReports();
+    fetchViewingInfo();
   }, []);
+
+  const courseNames = {
+    kanhotaru: '蛍観橋コース',
+    yuhodo: 'ほたる遊歩道',
+    donokoshi: '堂ノ腰コース',
+    genpei: '源平橋コース'
+  };
+  const courseOrder = ['kanhotaru', 'yuhodo', 'donokoshi', 'genpei'];
+
+  const activeRecommendedCourses = courseOrder.filter(cId => 
+    viewingInfo.recommended_courses && viewingInfo.recommended_courses.includes(cId)
+  ).map(cId => courseNames[cId]);
 
   const quickLinks = [
     { path: '/map', icon: '🗺️', title: 'ほたるマップ', desc: 'リアルタイム飛翔状況' },
     { path: '/events', icon: '🏮', title: 'イベント', desc: 'ほたる祭り情報' },
-
     { path: '/gallery', icon: '📸', title: 'ギャラリー', desc: '歴史と思い出' },
     { path: '/local-guide', icon: '🏞️', title: '地域紹介', desc: '福井の魅力と銘店' },
     { path: '/reports', icon: '📑', title: '活動レポート', desc: '保護活動の記録' },
@@ -61,6 +88,65 @@ export default function Home() {
                 <p className="news-content">
                   <Link to="/gallery">「第32回 福井ほたる祭り」のギャラリー</Link>を公開しました！お祭り当日の様子や活動風景を写真でご覧いただけます。
                 </p>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        {/* 最新のほたる観賞・見頃情報 */}
+        <div className="viewing-info-hero">
+          <div className="glass-card viewing-info-card">
+            <div className="viewing-info-header">
+              <h3 className="viewing-info-title">
+                <span className="viewing-info-icon">✨</span>最新のほたる観賞情報
+              </h3>
+              <span className="viewing-info-date">
+                {viewingInfo.updated_at ? `${viewingInfo.updated_at.split('T')[0].replace(/-/g, '.')} 更新` : ''}
+              </span>
+            </div>
+            
+            <div className="viewing-info-body">
+              <div className="viewing-info-item">
+                <span className="viewing-info-label">📅 ほたるの観賞期間</span>
+                <span className="viewing-info-val">{viewingInfo.viewing_period}</span>
+                <span className="viewing-info-assist">※その年の気候によって、飛び始めの時期や見頃のピークは変わります。</span>
+              </div>
+
+              <div className="viewing-info-item">
+                <span className="viewing-info-label">⏰ 現在の見頃時間帯</span>
+                <span className="viewing-info-val">{viewingInfo.time_range}</span>
+              </div>
+
+              <div className="viewing-info-item">
+                <span className="viewing-info-label">🗺️ 現在のおすすめ観賞コース</span>
+                <div className="recommended-courses-tags">
+                  {activeRecommendedCourses.length > 0 ? (
+                    activeRecommendedCourses.map((cName, idx) => (
+                      <span key={idx} className="course-tag">{cName}</span>
+                    ))
+                  ) : (
+                    <span className="course-tag disabled">現在おすすめコースなし</span>
+                  )}
+                </div>
+              </div>
+
+              {viewingInfo.comment && (
+                <div className="viewing-info-comment-box">
+                  <span className="comment-label">💬 事務局からの一言</span>
+                  <p className="comment-text">{viewingInfo.comment}</p>
+                </div>
+              )}
+
+              <div className="viewing-info-divider"></div>
+
+              <div className="viewing-info-footer">
+                <p className="footer-assist-text">
+                  リアルタイムの飛翔状況や、詳細な観賞コースマップは「ほたるマップ」からご確認いただけます。
+                </p>
+                <Link to="/map" className="btn-glow map-btn-link">
+                  🗺️ ほたるマップを見る
+                  <ArrowRight size={16} />
+                </Link>
               </div>
             </div>
           </div>
@@ -112,13 +198,9 @@ export default function Home() {
           </div>
 
           <div className="hero-cta">
-            <Link to="/map" className="btn-glow">
-              🗺️ ほたるマップを見る
+            <Link to="/events" className="btn-glow">
+              当日のスケジュールはこちら
               <ArrowRight size={16} />
-            </Link>
-            <Link to="/events" className="hero-secondary-link">
-              <span>当日のスケジュールはこちら</span>
-              <ArrowRight size={14} className="arrow-icon" />
             </Link>
           </div>
         </div>
@@ -236,21 +318,7 @@ export default function Home() {
         </div>
       </section>
 
-      {/* Info Banner */}
-      <section className="container">
-        <div className="info-banner">
-          <div className="info-banner-title">
-            <Sparkles size={18} className="title-icon" />
-            ゲンジボタル観賞期間
-          </div>
-          <div className="info-banner-text">
-            {eventInfo.viewingPeriod}（見頃：20:00〜20:30）<br />
-            <span style={{ fontSize: 'var(--text-sm)', color: 'var(--color-text-secondary)', display: 'inline-block', marginTop: 'var(--space-xs)' }}>
-              ※月明かりが少なく、風のない蒸し暑い夜に最も活発に飛び交います
-            </span>
-          </div>
-        </div>
-      </section>
+
 
       {/* Quick Links */}
       <section className="quick-links container">

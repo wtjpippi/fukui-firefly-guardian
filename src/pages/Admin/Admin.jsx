@@ -111,6 +111,12 @@ export default function AdminPage() {
   const [pointStatuses, setPointStatuses] = useState({});
   const [pointDescriptions, setPointDescriptions] = useState({});
 
+  // --- 最新見頃情報用のステート ---
+  const [viewingPeriod, setViewingPeriod] = useState('6月上旬〜6月下旬頃');
+  const [viewingTimeRange, setViewingTimeRange] = useState('20:00〜21:00頃');
+  const [recommendedCourses, setRecommendedCourses] = useState(['yuhodo']);
+  const [viewingComment, setViewingComment] = useState('');
+
   // レポート用（新規・編集共通）
   const [newReport, setNewReport] = useState({ title: '', content: '', category: '観測', date: new Date().toISOString().split('T')[0] });
   const [imageFiles, setImageFiles] = useState([]); // Fileオブジェクトの配列
@@ -244,10 +250,11 @@ export default function AdminPage() {
   }, [isAuthenticated]);
 
   async function fetchAll() {
-    const [fpRes, plRes, rRes] = await Promise.all([
+    const [fpRes, plRes, rRes, viRes] = await Promise.all([
       supabase.from('firefly_points').select('*').order('sort_order'),
       supabase.from('parking_lots').select('*').order('sort_order'),
       supabase.from('activity_reports').select('*').order('date', { ascending: false }),
+      supabase.from('viewing_info').select('*').eq('id', 'current').single(),
     ]);
     if (fpRes.data) {
       setFireflyPoints(fpRes.data);
@@ -262,7 +269,54 @@ export default function AdminPage() {
     }
     if (plRes.data) setParkingLots(plRes.data);
     if (rRes.data) setReports(rRes.data);
+    if (viRes.data) {
+      setViewingPeriod(viRes.data.viewing_period || '6月上旬〜6月下旬頃');
+      setViewingTimeRange(viRes.data.time_range || '20:00〜21:00頃');
+      setRecommendedCourses(viRes.data.recommended_courses || []);
+      setViewingComment(viRes.data.comment || '');
+    }
   }
+
+  const handleCourseCheckboxChange = (courseId, checked) => {
+    if (checked) {
+      setRecommendedCourses(prev => [...prev, courseId]);
+    } else {
+      setRecommendedCourses(prev => prev.filter(c => c !== courseId));
+    }
+  };
+
+  const updateViewingInfo = async () => {
+    if (!updaterName) {
+      alert('更新を行う前に、ページ上部で「更新者名」を入力してください');
+      return;
+    }
+    setSaving(true);
+    setSuccessMessage('');
+    try {
+      const { error } = await supabase
+        .from('viewing_info')
+        .upsert({
+          id: 'current',
+          viewing_period: viewingPeriod,
+          time_range: viewingTimeRange,
+          recommended_courses: recommendedCourses,
+          comment: viewingComment,
+          updated_at: new Date().toISOString()
+        });
+
+      if (error) throw error;
+      
+      setSuccessMessage('見頃情報を更新しました！');
+      setTimeout(() => setSuccessMessage(''), 3000);
+      
+      fetchAll();
+    } catch (err) {
+      console.error('Failed to update viewing info:', err);
+      alert('更新に失敗しました: ' + err.message);
+    } finally {
+      setSaving(false);
+    }
+  };
 
   const fetchRoutes = async () => {
     const { data } = await supabase.from('course_routes').select('*');
@@ -662,6 +716,109 @@ export default function AdminPage() {
         {/* 飛翔状況タブ */}
         {activeTab === 'firefly' && (
           <div className="admin-section">
+            {/* 見頃情報更新フォーム */}
+            <div className="admin-card highlight-card" style={{ border: '2px solid var(--color-firefly)', background: 'rgba(200, 230, 78, 0.03)', marginBottom: 'var(--space-xl)' }}>
+              <h3 style={{ display: 'flex', alignItems: 'center', gap: '8px', color: 'var(--color-firefly)', fontWeight: '700', fontSize: 'var(--text-base)', marginBottom: 'var(--space-md)' }}>
+                ✨ ほたる見頃＆おすすめ観賞コースの更新
+              </h3>
+              
+              <div className="admin-form-group" style={{ marginBottom: 'var(--space-md)' }}>
+                <label style={{ display: 'block', fontSize: 'var(--text-xs)', fontWeight: '700', color: 'var(--color-text-secondary)', marginBottom: '4px' }}>
+                  📅 観賞期間
+                </label>
+                <input
+                  type="text"
+                  value={viewingPeriod}
+                  onChange={(e) => setViewingPeriod(e.target.value)}
+                  className="admin-input"
+                  placeholder="例: 6月上旬〜6月下旬頃"
+                  disabled={saving}
+                  style={{ width: '100%' }}
+                />
+              </div>
+
+              <div className="admin-form-group" style={{ marginBottom: 'var(--space-md)' }}>
+                <label style={{ display: 'block', fontSize: 'var(--text-xs)', fontWeight: '700', color: 'var(--color-text-secondary)', marginBottom: '4px' }}>
+                  ⏰ 現在の見頃時間帯
+                </label>
+                <input
+                  type="text"
+                  value={viewingTimeRange}
+                  onChange={(e) => setViewingTimeRange(e.target.value)}
+                  className="admin-input"
+                  placeholder="例: 20:00〜21:00頃"
+                  disabled={saving}
+                  style={{ width: '100%' }}
+                />
+              </div>
+
+              <div className="admin-form-group" style={{ marginBottom: 'var(--space-md)' }}>
+                <label style={{ display: 'block', fontSize: 'var(--text-xs)', fontWeight: '700', color: 'var(--color-text-secondary)', marginBottom: '8px' }}>
+                  🗺️ 現在のおすすめ観賞コース (複数選択可)
+                </label>
+                <div style={{ display: 'flex', flexDirection: 'column', gap: '8px', background: 'rgba(255,255,255,0.03)', padding: '12px', borderRadius: 'var(--radius-sm)' }}>
+                  <label style={{ display: 'flex', alignItems: 'center', gap: '8px', cursor: 'pointer', fontSize: 'var(--text-sm)' }}>
+                    <input
+                      type="checkbox"
+                      checked={recommendedCourses.includes('kanhotaru')}
+                      onChange={(e) => handleCourseCheckboxChange('kanhotaru', e.target.checked)}
+                      disabled={saving}
+                    /> 蛍観橋コース
+                  </label>
+                  <label style={{ display: 'flex', alignItems: 'center', gap: '8px', cursor: 'pointer', fontSize: 'var(--text-sm)' }}>
+                    <input
+                      type="checkbox"
+                      checked={recommendedCourses.includes('yuhodo')}
+                      onChange={(e) => handleCourseCheckboxChange('yuhodo', e.target.checked)}
+                      disabled={saving}
+                    /> ほたる遊歩道
+                  </label>
+                  <label style={{ display: 'flex', alignItems: 'center', gap: '8px', cursor: 'pointer', fontSize: 'var(--text-sm)' }}>
+                    <input
+                      type="checkbox"
+                      checked={recommendedCourses.includes('donokoshi')}
+                      onChange={(e) => handleCourseCheckboxChange('donokoshi', e.target.checked)}
+                      disabled={saving}
+                    /> 堂ノ腰コース
+                  </label>
+                  <label style={{ display: 'flex', alignItems: 'center', gap: '8px', cursor: 'pointer', fontSize: 'var(--text-sm)' }}>
+                    <input
+                      type="checkbox"
+                      checked={recommendedCourses.includes('genpei')}
+                      onChange={(e) => handleCourseCheckboxChange('genpei', e.target.checked)}
+                      disabled={saving}
+                    /> 源平橋コース
+                  </label>
+                </div>
+              </div>
+
+              <div className="admin-form-group" style={{ marginBottom: 'var(--space-md)' }}>
+                <label style={{ display: 'block', fontSize: 'var(--text-xs)', fontWeight: '700', color: 'var(--color-text-secondary)', marginBottom: '4px' }}>
+                  💬 事務局からの一言コメント
+                </label>
+                <textarea
+                  value={viewingComment}
+                  onChange={(e) => setViewingComment(e.target.value)}
+                  className="admin-input"
+                  placeholder="例: 遊歩道エリアが一番多く飛んでいておすすめです！"
+                  disabled={saving}
+                  rows={2}
+                  style={{ width: '100%', padding: '10px', height: 'auto' }}
+                />
+              </div>
+
+              <div style={{ textAlign: 'right' }}>
+                <button
+                  onClick={updateViewingInfo}
+                  className="admin-btn primary"
+                  disabled={saving}
+                  style={{ width: 'auto', padding: '10px 24px' }}
+                >
+                  {saving ? '保存中...' : '見頃情報を更新する'}
+                </button>
+              </div>
+            </div>
+
             <h2>飛翔ポイントの状況更新</h2>
             {fireflyPoints.map(point => (
               <div key={point.id} className="admin-card">
