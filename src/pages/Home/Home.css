@@ -889,7 +889,7 @@
 .viewing-info-body {
   display: flex;
   flex-direction: column;
-  gap: var(--space-lg); /* 情報同士の距離を少し広げて見やすく */
+  gap: var(--space-md);
   text-align: left;
 }
 

@@ -160,7 +160,7 @@ export default function Home() {
 
               <div className="viewing-info-footer">
                 <p className="footer-assist-text">
-                  リアルタイムの飛翔状況や、詳細な観賞コースマップは「ほたるマップ」からご確認いただけます。
+                  最新の飛翔状況や観賞コースの詳細は、ほたるマップへ。
                 </p>
                 <Link to="/map" className="btn-glow map-btn-link">
                   🗺️ ほたるマップを見る
