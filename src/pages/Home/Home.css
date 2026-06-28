@@ -814,6 +814,78 @@
   margin-left: 26px; /* アイコンのインデントを考慮 */
 }
 
+/* ツールチップ（吹き出し）のスタイル */
+.help-tooltip-container {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+}
+
+.help-trigger-btn {
+  background: none;
+  border: none;
+  color: var(--color-text-muted);
+  cursor: pointer;
+  padding: 2px;
+  display: inline-flex;
+  align-items: center;
+  margin-left: 6px;
+  vertical-align: middle;
+  transition: all var(--transition-fast);
+  border-radius: 50%;
+}
+
+.help-trigger-btn:hover,
+.help-trigger-btn:focus {
+  color: var(--color-firefly);
+  background: rgba(200, 230, 78, 0.1);
+  outline: none;
+}
+
+.help-tooltip-bubble {
+  position: absolute;
+  bottom: calc(100% + 8px);
+  left: 50%;
+  transform: translateX(-50%);
+  background: rgba(10, 25, 15, 0.98);
+  backdrop-filter: blur(12px);
+  border: 1px solid rgba(200, 230, 78, 0.3);
+  padding: 8px 12px;
+  border-radius: var(--radius-sm);
+  font-size: 11px;
+  color: var(--color-text-secondary);
+  line-height: 1.4;
+  width: 220px;
+  text-align: center;
+  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.6);
+  z-index: 100;
+  pointer-events: none;
+  animation: tooltipFadeIn 0.2s ease forwards;
+}
+
+/* 吹き出しの矢印 */
+.help-tooltip-bubble::after {
+  content: '';
+  position: absolute;
+  top: 100%;
+  left: 50%;
+  transform: translateX(-50%);
+  border-width: 5px;
+  border-style: solid;
+  border-color: rgba(200, 230, 78, 0.3) transparent transparent transparent;
+}
+
+@keyframes tooltipFadeIn {
+  from {
+    opacity: 0;
+    transform: translate(-50%, 5px);
+  }
+  to {
+    opacity: 1;
+    transform: translate(-50%, 0);
+  }
+}
+
 .viewing-info-body {
   display: flex;
   flex-direction: column;

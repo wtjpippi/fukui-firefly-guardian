@@ -7,6 +7,7 @@ import './Home.css';
 
 export default function Home() {
   const [latestReports, setLatestReports] = useState([]);
+  const [showPeriodHelp, setShowPeriodHelp] = useState(false);
   const [viewingInfo, setViewingInfo] = useState({
     viewing_period: '6月上旬〜6月下旬頃',
     time_range: '20:00〜21:00頃',
@@ -107,9 +108,27 @@ export default function Home() {
             
             <div className="viewing-info-body">
               <div className="viewing-info-item">
-                <span className="viewing-info-label">📅 ほたるの観賞期間</span>
+                <span className="viewing-info-label" style={{ display: 'flex', alignItems: 'center' }}>
+                  📅 ほたるの観賞期間
+                  <span className="help-tooltip-container">
+                    <button
+                      type="button"
+                      className="help-trigger-btn"
+                      onClick={() => setShowPeriodHelp(!showPeriodHelp)}
+                      onMouseEnter={() => setShowPeriodHelp(true)}
+                      onMouseLeave={() => setShowPeriodHelp(false)}
+                      aria-label="観賞期間についての説明を表示"
+                    >
+                      <Info size={13} />
+                    </button>
+                    {showPeriodHelp && (
+                      <span className="help-tooltip-bubble">
+                        その年の気候によって、飛び始めの時期や見頃のピークは変わります。
+                      </span>
+                    )}
+                  </span>
+                </span>
                 <span className="viewing-info-val">{viewingInfo.viewing_period}</span>
-                <span className="viewing-info-assist">※その年の気候によって、飛び始めの時期や見頃のピークは変わります。</span>
               </div>
 
               <div className="viewing-info-item">
