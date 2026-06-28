@@ -817,7 +817,7 @@
 .viewing-info-body {
   display: flex;
   flex-direction: column;
-  gap: var(--space-md);
+  gap: var(--space-lg); /* 情報同士の距離を少し広げて見やすく */
   text-align: left;
 }
 
@@ -852,7 +852,7 @@
   display: flex;
   flex-wrap: wrap;
   gap: var(--space-xs);
-  margin-top: 2px;
+  margin-top: 4px;
 }
 
 .course-tag {
@@ -860,8 +860,8 @@
   font-weight: 700;
   color: var(--color-bg-primary);
   background: var(--color-firefly);
-  padding: 4px 12px;
-  border-radius: var(--radius-sm);
+  padding: 4px 14px; /* 左右を広げてカプセル形状に適合 */
+  border-radius: var(--radius-full); /* マップボタンに合わせた楕円形(カプセル型)に変更 */
   box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
 }
 
@@ -875,8 +875,8 @@
 .viewing-info-comment-box {
   background: rgba(200, 230, 78, 0.05);
   border-left: 3px solid var(--color-firefly);
-  padding: var(--space-sm);
-  border-radius: 0 var(--radius-sm) var(--radius-sm) 0;
+  padding: var(--space-sm) var(--space-md);
+  border-radius: 0 var(--radius-md) var(--radius-md) 0; /* 丸みに合わせた角丸に微調整 */
   margin-top: var(--space-xs);
 }
 
@@ -889,10 +889,12 @@
 }
 
 .comment-text {
-  font-size: var(--text-sm);
+  font-size: 13px; /* 13pxに微調整してスマホサイズでの不自然な改行を防止 */
   color: var(--color-text-secondary);
   line-height: 1.6;
   margin: 0;
+  word-break: keep-all;
+  overflow-wrap: anywhere;
 }
 
 .viewing-info-divider {
