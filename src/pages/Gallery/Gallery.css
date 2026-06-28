@@ -195,30 +195,31 @@
   margin-bottom: var(--space-xl);
   border-bottom: 1px solid var(--color-border);
   padding-bottom: var(--space-md);
-  overflow: hidden;
+  overflow-x: auto; /* 横スクロールを許可 */
+  -webkit-overflow-scrolling: touch; /* iOSでの慣性スクロールを有効化 */
 }
 
-.category-tabs-all-row {
-  display: flex;
-  justify-content: center;
-  margin-bottom: var(--space-sm);
+/* スクロールバーの非表示（見た目をすっきりさせるため） */
+.category-tabs-container::-webkit-scrollbar {
+  display: none;
 }
 
 .category-tabs {
   display: flex;
-  flex-wrap: wrap;
-  justify-content: center; /* 中央寄せにして全体のバランスを整える */
+  flex-wrap: nowrap; /* 折り返さない */
   gap: var(--space-sm);
+  width: max-content; /* 中身の幅いっぱいに広げる */
+  padding: 0 4px; /* 端に少し余白をつくる */
 }
 
 .tab-button {
   background: rgba(255, 255, 255, 0.03);
   color: var(--color-text-secondary);
   border: 1px solid var(--color-border);
-  padding: 8px 16px;
+  padding: 8px 18px;
   border-radius: var(--radius-full);
   font-size: var(--text-sm);
-  font-weight: 500;
+  font-weight: 700; /* 文字を少し太くして視認性をアップ */
   cursor: pointer;
   white-space: nowrap;
   transition: all var(--transition-fast);
@@ -412,6 +413,19 @@
   color: var(--color-firefly);
   border-color: var(--color-firefly);
   background: rgba(200, 230, 78, 0.05);
+}
+
+/* PCや大画面ではスワイプさせず、普通に折り返して表示させる（十分なスペースがあるため） */
+@media (min-width: 768px) {
+  .category-tabs-container {
+    overflow-x: visible;
+  }
+  .category-tabs {
+    flex-wrap: wrap; /* 大画面では通常通り折り返し */
+    width: 100%; /* 横幅いっぱい */
+    justify-content: flex-start; /* 左寄せ */
+    padding: 0;
+  }
 }
 
 /* PC等でのテーマカード横並び対応 */
