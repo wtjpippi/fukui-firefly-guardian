@@ -794,7 +794,7 @@ export default function AdminPage() {
 
               <div className="admin-form-group" style={{ marginBottom: 'var(--space-md)' }}>
                 <label style={{ display: 'block', fontSize: 'var(--text-xs)', fontWeight: '700', color: 'var(--color-text-secondary)', marginBottom: '4px' }}>
-                  💬 事務局からの一言コメント
+                  💡 ほたる保護監視員からのメモ（コメント）
                 </label>
                 <textarea
                   value={viewingComment}

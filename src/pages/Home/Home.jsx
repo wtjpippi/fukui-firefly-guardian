@@ -151,7 +151,7 @@ export default function Home() {
 
               {viewingInfo.comment && (
                 <div className="viewing-info-comment-box">
-                  <span className="comment-label">💬 事務局からの一言</span>
+                  <span className="comment-label">💡 ほたる保護監視員からのメモ</span>
                   <p className="comment-text">{viewingInfo.comment}</p>
                 </div>
               )}
