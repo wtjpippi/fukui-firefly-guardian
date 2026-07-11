@@ -73,10 +73,33 @@ export default function Reports() {
 
   const filteredReports = reports.filter(r => r.date.startsWith(selectedYear));
 
+  // 戻るボタンなどの履歴操作を検知してLightboxを閉じる
+  useEffect(() => {
+    const handlePopState = (event) => {
+      // 履歴に lightbox フラグがない場合は閉じる
+      if (!event.state || !event.state.lightbox) {
+        setLightboxOpen(false);
+      }
+    };
+    window.addEventListener('popstate', handlePopState);
+    return () => {
+      window.removeEventListener('popstate', handlePopState);
+    };
+  }, []);
+
   const openLightbox = (images, index) => {
     setLightboxImages(images.map(src => ({ src })));
     setLightboxIndex(index);
+    window.history.pushState({ lightbox: true }, ''); // 履歴スタックにフラグを積む
     setLightboxOpen(true);
+  };
+
+  const closeLightbox = () => {
+    // 履歴スタックにフラグがある場合のみ戻る（二重戻りを防ぐ）
+    if (window.history.state && window.history.state.lightbox) {
+      window.history.back();
+    }
+    setLightboxOpen(false);
   };
 
   return (
@@ -172,7 +195,7 @@ export default function Reports() {
 
       <Lightbox
         open={lightboxOpen}
-        close={() => setLightboxOpen(false)}
+        close={closeLightbox}
         index={lightboxIndex}
         slides={lightboxImages}
         plugins={[Zoom]}
