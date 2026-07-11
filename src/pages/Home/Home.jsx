@@ -150,7 +150,11 @@ export default function Home() {
                       <span key={idx} className="course-tag">{cName}</span>
                     ))
                   ) : (
-                    <span className="course-tag disabled">現在おすすめコースなし</span>
+                    <span className="course-status-text">
+                      {IS_TOUR_FINISHED 
+                        ? '観賞期間終了（シーズンオフ）' 
+                        : 'シーズンオフ（6月上旬より情報更新予定）'}
+                    </span>
                   )}
                 </div>
               </div>
