@@ -2,16 +2,25 @@ name: Supabase Keep Alive
 
 on:
   schedule:
-    # 3日ごとに実行（UTC 0:00 = JST 9:00）
-    - cron: '0 0 */3 * *'
+    # 2日ごとに実行（UTC 0:00 = JST 9:00）
+    - cron: '0 0 */2 * *'
   workflow_dispatch: # 手動実行も可能にする
 
 jobs:
-  ping:
+  heartbeat:
     runs-on: ubuntu-latest
     steps:
-      - name: Ping Supabase Database
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+
+      - name: Run Heartbeat Script
+        env:
+          SUPABASE_URL: ${{ secrets.SUPABASE_URL || 'https://bcxgspobwkorzhhysuyb.supabase.co' }}
+          SUPABASE_ANON_KEY: ${{ secrets.SUPABASE_ANON_KEY || 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImJjeGdzcG9id2tvcnpoaHlzdXliIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzUyNTEyNjAsImV4cCI6MjA5MDgyNzI2MH0.xAOaxSENOxtHieegrbZkOhThCUxfrPsni7P1-LaIvhU' }}
         run: |
-          curl -X GET "${{ secrets.SUPABASE_URL }}/rest/v1/firefly_points?select=id&limit=1" \
-          -H "apikey: ${{ secrets.SUPABASE_ANON_KEY }}" \
-          -H "Authorization: Bearer ${{ secrets.SUPABASE_ANON_KEY }}"
+          node scripts/keep-alive.js
