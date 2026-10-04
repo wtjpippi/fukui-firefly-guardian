@@ -1,0 +1,110 @@
+[
+  {
+    "id": "point-donokoshi-1",
+    "name": "堂ノ腰コース　林道出口",
+    "course": "堂ノ腰コース",
+    "lat": 37.756259,
+    "lng": 138.834314,
+    "status": "past_peak",
+    "description": "ピークは過ぎましたが、コースから奥に見える支流沿いに飛翔は続いています。",
+    "updated_at": "2026-06-24T11:49:24.151+00:00",
+    "updated_by": "桑原",
+    "sort_order": 2
+  },
+  {
+    "id": "point-donokoshi-2",
+    "name": "堂ノ腰コース　林道中間",
+    "course": "堂ノ腰コース",
+    "lat": 37.756602,
+    "lng": 138.833343,
+    "status": "past_peak",
+    "description": "ピークは過ぎましたが、コースから奥に見える支流沿いに飛翔は続いています。",
+    "updated_at": "2026-06-24T11:49:48.676+00:00",
+    "updated_by": "桑原",
+    "sort_order": 3
+  },
+  {
+    "id": "point-hotaru-1",
+    "name": "蛍観橋コース　蛍観橋付近",
+    "course": "蛍観橋コース",
+    "lat": 37.760707,
+    "lng": 138.832346,
+    "status": "past_peak",
+    "description": "",
+    "updated_at": "2026-07-01T14:05:30.696+00:00",
+    "updated_by": "桑原",
+    "sort_order": 1
+  },
+  {
+    "id": "point-genpei-4",
+    "name": "源平橋コース　源氏橋上",
+    "course": "源平橋コース",
+    "lat": 37.758099,
+    "lng": 138.834803,
+    "status": "past_peak",
+    "description": "ピークは過ぎましたが、川沿いの木々の中に、優しく光るほたるの姿が見られます。",
+    "updated_at": "2026-07-01T14:06:11.035+00:00",
+    "updated_by": "桑原",
+    "sort_order": 9
+  },
+  {
+    "id": "point-donokoshi-3",
+    "name": "堂ノ腰コース　林道入口",
+    "course": "堂ノ腰コース",
+    "lat": 37.757659,
+    "lng": 138.832313,
+    "status": "past_peak",
+    "description": "",
+    "updated_at": "2026-07-01T14:07:17.342+00:00",
+    "updated_by": "桑原",
+    "sort_order": 4
+  },
+  {
+    "id": "point-genpei-1",
+    "name": "源平橋コース　平家橋下",
+    "course": "源平橋コース",
+    "lat": 37.755407,
+    "lng": 138.835881,
+    "status": "past_peak",
+    "description": "観賞期間は終了しました。",
+    "updated_at": "2026-07-03T12:12:31.767+00:00",
+    "updated_by": "桑原",
+    "sort_order": 6
+  },
+  {
+    "id": "point-genpei-2",
+    "name": "源平橋コース　イモ穴橋下",
+    "course": "源平橋コース",
+    "lat": 37.756494,
+    "lng": 138.83535,
+    "status": "past_peak",
+    "description": "観賞期間は終了しました。",
+    "updated_at": "2026-07-03T12:12:34.887+00:00",
+    "updated_by": "桑原",
+    "sort_order": 7
+  },
+  {
+    "id": "point-genpei-3",
+    "name": "源平橋コース　イモ穴橋上",
+    "course": "源平橋コース",
+    "lat": 37.757093,
+    "lng": 138.83506,
+    "status": "past_peak",
+    "description": "観賞期間は終了しました。",
+    "updated_at": "2026-07-03T12:12:38.585+00:00",
+    "updated_by": "桑原",
+    "sort_order": 8
+  },
+  {
+    "id": "point-donokoshi-4",
+    "name": "ほたる遊歩道",
+    "course": "ほたる遊歩道",
+    "lat": 37.75791,
+    "lng": 138.830865,
+    "status": "past_peak",
+    "description": "水路の山側沿いや、上流で飛翔しています",
+    "updated_at": "2026-07-07T12:08:32.401+00:00",
+    "updated_by": "桑原",
+    "sort_order": 5
+  }
+]

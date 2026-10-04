@@ -1,0 +1,50 @@
+[
+  {
+    "id": "current",
+    "viewing_period": "6月上旬〜6月下旬頃",
+    "time_range": "20:00〜20:30頃",
+    "recommended_courses": [],
+    "comment": "今年度のほたる観賞期間は終了しました。 連日たくさんの皆様にお越しいただき、誠にありがとうございました。 現在は飛翔数もごくわずかとなり、今年のシーズンは静かに幕を閉じます。また来年の6月、ほたるたちが再び舞い始める季節に皆様とお会いできることを楽しみにしております。",
+    "updated_at": "2026-07-11T01:42:28.956+00:00"
+  },
+  {
+    "id": "system_heartbeat_5",
+    "viewing_period": "6月上旬〜6月下旬頃",
+    "time_range": "20:00〜21:00頃",
+    "recommended_courses": [],
+    "comment": "keepalive-pulse-7kv2qhvj",
+    "updated_at": "2026-09-21T02:23:15.711+00:00"
+  },
+  {
+    "id": "system_heartbeat_2",
+    "viewing_period": "6月上旬〜6月下旬頃",
+    "time_range": "20:00〜21:00頃",
+    "recommended_courses": [],
+    "comment": "keepalive-pulse-gjue3zzy",
+    "updated_at": "2026-09-23T02:26:59.878+00:00"
+  },
+  {
+    "id": "system_heartbeat_4",
+    "viewing_period": "6月上旬〜6月下旬頃",
+    "time_range": "20:00〜21:00頃",
+    "recommended_courses": [],
+    "comment": "keepalive-pulse-a85f9wtv",
+    "updated_at": "2026-09-25T02:32:24.524+00:00"
+  },
+  {
+    "id": "system_heartbeat_1",
+    "viewing_period": "6月上旬〜6月下旬頃",
+    "time_range": "20:00〜21:00頃",
+    "recommended_courses": [],
+    "comment": "keepalive-pulse-tsaij0hg",
+    "updated_at": "2026-09-27T02:33:08.477+00:00"
+  },
+  {
+    "id": "system_heartbeat_3",
+    "viewing_period": "6月上旬〜6月下旬頃",
+    "time_range": "20:00〜21:00頃",
+    "recommended_courses": [],
+    "comment": "keepalive-pulse-8onra10s",
+    "updated_at": "2026-10-01T03:08:15.277+00:00"
+  }
+]

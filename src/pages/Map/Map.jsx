@@ -5,6 +5,7 @@ import Lightbox from 'yet-another-react-lightbox';
 import 'yet-another-react-lightbox/styles.css';
 import { MapPin, Navigation } from 'lucide-react';
 import { supabase } from '../../lib/supabaseClient';
+import { staticBackupData } from '../../data/staticBackupData';
 import { formatStatusTime, getLatestUpdate, getFormattedToday } from '../../utils/dateUtils';
 import { getGoogleMapsNavUrl } from '../../utils/geoUtils';
 import 'leaflet/dist/leaflet.css';
@@ -392,16 +393,28 @@ const snapTerminals = (courseId, path) => {
 // ほたるマップページ
 export default function MapPage() {
   const [map, setMap] = useState(null);
-  const [fireflyPoints, setFireflyPoints] = useState([]);
+  const [fireflyPoints, setFireflyPoints] = useState(() => staticBackupData.firefly_points || []);
   const [imageErrors, setImageErrors] = useState({});
   const [lightboxIndex, setLightboxIndex] = useState(-1);
   const [lightboxImages, setLightboxImages] = useState([]);
-  const [parkingLots, setParkingLots] = useState([]);
+  const [parkingLots, setParkingLots] = useState(() => staticBackupData.parking_lots || []);
   const [userPosition, setUserPosition] = useState(null);
   const [isLocating, setIsLocating] = useState(false);
   const [shouldFollowUser, setShouldFollowUser] = useState(false);
-  const [isLoading, setIsLoading] = useState(true);
-  const [courses, setCourses] = useState(defaultCourses);
+  const [isLoading, setIsLoading] = useState(false);
+  const [courses, setCourses] = useState(() => {
+    const dbRoutes = staticBackupData.course_routes || [];
+    if (dbRoutes.length > 0) {
+      return defaultCourses.map(dc => {
+        const dbRoute = dbRoutes.find(r => r.id === dc.id);
+        if (dbRoute && dbRoute.path && dbRoute.path.length > 0) {
+          return { ...dc, path: dbRoute.path, isDynamic: true };
+        }
+        return dc;
+      });
+    }
+    return defaultCourses;
+  });
   const [currentZoom, setCurrentZoom] = useState(15.5);
   const [compassHeading, setCompassHeading] = useState(null);
   const markerRefs = useRef({});
@@ -417,30 +430,31 @@ export default function MapPage() {
     const isPreviewMode = params.get('preview') === 'true';
 
     async function fetchData() {
-      setIsLoading(true);
-      const [fpRes, plRes, routeRes] = await Promise.all([
-        supabase.from('firefly_points').select('*').order('sort_order'),
-        supabase.from('parking_lots').select('*').order('sort_order'),
-        supabase.from('course_routes').select('*')
-      ]);
-      if (fpRes.data) setFireflyPoints(fpRes.data);
-      if (plRes.data) setParkingLots(plRes.data);
-      
-      if (routeRes.data && routeRes.data.length > 0) {
-        const updatedCourses = defaultCourses.map(dc => {
-          const dbRoute = routeRes.data.find(r => r.id === dc.id);
-          if (dbRoute) {
-            // プレビューモードの場合は下書き（draft_path）を優先読み込み
-            const pathToUse = isPreviewMode ? dbRoute.draft_path : dbRoute.path;
-            if (pathToUse && pathToUse.length > 0) {
-              return { ...dc, path: pathToUse, isDynamic: true };
+      try {
+        const [fpRes, plRes, routeRes] = await Promise.all([
+          supabase.from('firefly_points').select('*').order('sort_order'),
+          supabase.from('parking_lots').select('*').order('sort_order'),
+          supabase.from('course_routes').select('*')
+        ]);
+        if (fpRes && fpRes.data && fpRes.data.length > 0) setFireflyPoints(fpRes.data);
+        if (plRes && plRes.data && plRes.data.length > 0) setParkingLots(plRes.data);
+        
+        if (routeRes && routeRes.data && routeRes.data.length > 0) {
+          const updatedCourses = defaultCourses.map(dc => {
+            const dbRoute = routeRes.data.find(r => r.id === dc.id);
+            if (dbRoute) {
+              const pathToUse = isPreviewMode ? dbRoute.draft_path : dbRoute.path;
+              if (pathToUse && pathToUse.length > 0) {
+                return { ...dc, path: pathToUse, isDynamic: true };
+              }
             }
-          }
-          return dc;
-        });
-        setCourses(updatedCourses);
+            return dc;
+          });
+          setCourses(updatedCourses);
+        }
+      } catch (err) {
+        console.warn('Using static backup data for map due to error:', err);
       }
-      setIsLoading(false);
     }
     fetchData();
   }, []);

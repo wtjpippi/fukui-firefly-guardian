@@ -2,6 +2,8 @@ import { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { MapPin, Calendar, ArrowRight, Footprints, LightbulbOff, CameraOff, Heart, Trees, Info, Sparkles, ExternalLink, Search, Users, Megaphone } from 'lucide-react';
 import { supabase } from '../../lib/supabaseClient';
+import { staticBackupData } from '../../data/staticBackupData';
+import { getReportImageUrl } from '../../utils/imageHelper';
 import { eventInfo } from '../../config/eventInfo';
 import './Home.css';
 
@@ -12,32 +14,42 @@ export default function Home() {
   // ほたる祭り：終了時は true、開催前・当日は false にするだけで一括切り替え
   const IS_FESTIVAL_FINISHED = true;
 
-  const [latestReports, setLatestReports] = useState([]);
-  const [showPeriodHelp, setShowPeriodHelp] = useState(false);
-  const [viewingInfo, setViewingInfo] = useState({
+  const defaultViewing = staticBackupData.viewing_info?.find(v => v.id === 'current') || {
     viewing_period: '6月上旬〜6月下旬頃',
     time_range: '20:00〜21:00頃',
     recommended_courses: ['yuhodo'],
     comment: 'ほたる遊歩道エリアで多くの飛翔が見られます！',
     updated_at: new Date().toISOString()
-  });
+  };
+
+  const [latestReports, setLatestReports] = useState(() => (staticBackupData.activity_reports || []).slice(0, 3));
+  const [showPeriodHelp, setShowPeriodHelp] = useState(false);
+  const [viewingInfo, setViewingInfo] = useState(defaultViewing);
 
   useEffect(() => {
     async function fetchLatestReports() {
-      const { data } = await supabase
-        .from('activity_reports')
-        .select('*')
-        .order('date', { ascending: false })
-        .limit(3);
-      if (data) setLatestReports(data);
+      try {
+        const { data } = await supabase
+          .from('activity_reports')
+          .select('*')
+          .order('date', { ascending: false })
+          .limit(3);
+        if (data && data.length > 0) setLatestReports(data);
+      } catch (err) {
+        console.warn('Using static backup latest reports:', err);
+      }
     }
     async function fetchViewingInfo() {
-      const { data } = await supabase
-        .from('viewing_info')
-        .select('*')
-        .eq('id', 'current')
-        .single();
-      if (data) setViewingInfo(data);
+      try {
+        const { data } = await supabase
+          .from('viewing_info')
+          .select('*')
+          .eq('id', 'current')
+          .single();
+        if (data) setViewingInfo(data);
+      } catch (err) {
+        console.warn('Using static backup viewing info:', err);
+      }
     }
     fetchLatestReports();
     fetchViewingInfo();
@@ -398,13 +410,16 @@ export default function Home() {
               <div className="report-preview-date">{report.date} ・ {report.author}</div>
               <h3 className="report-preview-title">{report.title}</h3>
               <div style={{ display: 'flex', gap: 'var(--space-md)', alignItems: 'flex-start' }}>
-                {(report.image_urls?.[0] || report.image_url) && (
-                  <img 
-                    src={report.image_urls?.[0] || report.image_url} 
-                    alt="" 
-                    style={{ width: '60px', height: '60px', objectFit: 'cover', borderRadius: 'var(--radius-sm)', flexShrink: 0 }} 
-                  />
-                )}
+                {(() => {
+                  const firstImg = report.images?.[0] || report.image_urls?.[0] || report.image_url;
+                  return firstImg ? (
+                    <img 
+                      src={getReportImageUrl(firstImg)} 
+                      alt="" 
+                      style={{ width: '60px', height: '60px', objectFit: 'cover', borderRadius: 'var(--radius-sm)', flexShrink: 0 }} 
+                    />
+                  ) : null;
+                })()}
                 <div className="report-preview-excerpt" style={{ whiteSpace: 'pre-wrap' }}>{report.content}</div>
               </div>
               <div className="report-preview-footer">

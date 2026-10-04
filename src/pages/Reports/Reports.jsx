@@ -1,5 +1,7 @@
 import { useState, useEffect } from 'react';
 import { supabase } from '../../lib/supabaseClient';
+import { staticBackupData } from '../../data/staticBackupData';
+import { getReportImageUrl } from '../../utils/imageHelper';
 import Lightbox from "yet-another-react-lightbox";
 import "yet-another-react-lightbox/styles.css";
 import Zoom from "yet-another-react-lightbox/plugins/zoom";
@@ -13,32 +15,41 @@ const categoryColors = {
 };
 
 export default function Reports() {
-  const [reports, setReports] = useState([]);
-  const [isLoading, setIsLoading] = useState(true);
+  const [reports, setReports] = useState(() => staticBackupData.activity_reports || []);
+  const [isLoading, setIsLoading] = useState(false);
   const [lightboxOpen, setLightboxOpen] = useState(false);
   const [lightboxImages, setLightboxImages] = useState([]);
   const [lightboxIndex, setLightboxIndex] = useState(0);
-  const [selectedYear, setSelectedYear] = useState(new Date().getFullYear().toString());
-  const [availableYears, setAvailableYears] = useState([]);
+  const [selectedYear, setSelectedYear] = useState(() => {
+    const list = staticBackupData.activity_reports || [];
+    if (list.length > 0) return list[0].date.split('-')[0];
+    return new Date().getFullYear().toString();
+  });
+  const [availableYears, setAvailableYears] = useState(() => {
+    const list = staticBackupData.activity_reports || [];
+    return [...new Set(list.map(r => r.date.split('-')[0]))].sort((a, b) => b - a);
+  });
 
   useEffect(() => {
     async function fetchReports() {
-      setIsLoading(true);
-      const { data } = await supabase
-        .from('activity_reports')
-        .select('*')
-        .order('date', { ascending: false });
+      try {
+        const { data, error } = await supabase
+          .from('activity_reports')
+          .select('*')
+          .order('date', { ascending: false });
 
-      if (data) {
-        setReports(data);
-        const years = [...new Set(data.map(r => r.date.split('-')[0]))].sort((a, b) => b - a);
-        setAvailableYears(years);
+        if (data && data.length > 0) {
+          setReports(data);
+          const years = [...new Set(data.map(r => r.date.split('-')[0]))].sort((a, b) => b - a);
+          setAvailableYears(years);
 
-        if (years.length > 0 && !years.includes(selectedYear)) {
-          setSelectedYear(years[0]);
+          if (years.length > 0 && !years.includes(selectedYear)) {
+            setSelectedYear(years[0]);
+          }
         }
+      } catch (err) {
+        console.warn('Using static backup reports due to fetch error:', err);
       }
-      setIsLoading(false);
     }
     fetchReports();
   }, []);
@@ -150,7 +161,8 @@ export default function Reports() {
           </div>
         ) : (
           filteredReports.map(report => {
-            const images = report.image_urls || (report.image_url ? [report.image_url] : []);
+            const rawImages = report.images || report.image_urls || (report.image_url ? [report.image_url] : []);
+            const images = rawImages.map(getReportImageUrl);
             return (
               <div key={report.id} id={`report-${report.id}`} className="glass-card" style={{ marginBottom: 'var(--space-md)', scrollMarginTop: '100px' }}>
                 <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 'var(--space-sm)' }}>
